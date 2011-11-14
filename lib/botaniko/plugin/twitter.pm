@@ -94,7 +94,7 @@ command
 		}
 	},
 	follower => {
-		help => 'follower [regex]',
+		help => 'follower [regex] : list followers',
 		bin  => sub {
 			my $arg   = shift;
 			my $regex = $arg ? qr/$arg/i : qr/./;
@@ -117,7 +117,7 @@ command
 		}
 	},
 	following => {
-		help => 'following [regex]',
+		help => 'following [regex] : list following',
 		bin  => sub {
 			my $arg   = shift;
 			my $regex = $arg ? qr/$arg/i : qr/./;
