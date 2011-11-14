@@ -8,13 +8,14 @@ use botaniko::tools;
 use botaniko::config;
 
 use base 'Exporter';
-our @EXPORT = qw(plugins plugin unplugin pname);
+our @EXPORT = qw(plugins plugin unplugin plugged);
 
 our $PLUGNAME = 'core';
 
 my %plugins;
 
 sub plugins { sort keys %plugins }
+sub plugged { shift ~~ plugins() }
 
 sub plugin {
 	$PLUGNAME = lc shift;
