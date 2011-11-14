@@ -86,9 +86,12 @@ sub process_url {
 			title=> $title,
 			meta => $url,
 		} };
-		if( $chan ne 'twitter' && cfg('plugins.url.tweet_url') && $text !~ /notweet/ ) {
+		if( $chan ne 'twitter' && 
+			cfg('plugins.url.tweet_url') && 
+			$text !~ /notweet/
+		) {
 			$text =~ s/^[^\s\:]+\:\s+//;
-			eval { botaniko::plugins::twitter::tweet $text }
+			fire TOTWEET=>$text;
 		}
 	}
 }

@@ -62,7 +62,7 @@ sub get_twitter_timeline {
 	}
 }
 
-sub tweet {
+hook TOTWEET=>sub {
 	my $txt = shift;
 	trace INFO=>"TWEET $txt";
 	eval { $twitter->update( $txt ) };
@@ -71,7 +71,7 @@ sub tweet {
 		return 0
 	}
 	1
-}
+};
 
 async( 
 	cb       => sub{ get_twitter_timeline },
