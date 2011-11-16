@@ -138,8 +138,8 @@ sub plant {
 		},
 		nick_change => sub {
 			my( $cnx, $old, $new, $myself ) = @_;
-			trace DEBUG=>"$old become $new";
-			fire NICKCHANGE $old,$new;
+			trace DEBUG=>"$old becomes $new";
+			fire NICKCHANGE=>$old,$new;
 		},
 	);
 	trace INFO=>'connecting to '.cfg('server.host').':'.cfg('server.port');
