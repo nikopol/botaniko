@@ -122,10 +122,13 @@ sub plant {
 				my $ans;
 				if( sha1_hex($what) eq cfg 'passphrase' ) {
 					admin $from=>1;
-					send_user $who=>'zog zog master !';
+					send_user $who=>pickone(
+						'zog zog master !',
+						'I kneel before you my king',
+					);
 					trace INFO=>"admin $from ($who) registred";
 				} else {
-					send_user $who=>run( $who, $from, $msg );
+					send_user $who=>run( $who, $from, $what );
 				}
 			} else {
 				my $who  = $msg->{prefix} || 'server';
