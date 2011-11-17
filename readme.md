@@ -33,27 +33,27 @@ make sure elasticsearch is started
 core commands
 -------------
 
-- help [command]
-- join #chan1 [#chan2 [...]]    : join channels
-- leave #chan1 [#chan2 [...]]   : leave channels
-- load plugin [plugin [...]]    : try to load one or more plugins
-- mute                          : turn off all outputs'
-- plugins                       : list loaded plugins
-- quit
-- search query [from=0] [count=5] [type=tweet|url|...] : search from db
-- set variable [value]          : get or set a configuration variable
-- unload plugin [plugin [...]]  : unload one or more plugin
-- unmute                        : turn on all outputs
-- uptime
-- version
+	- help [command]
+	- join #chan1 [#chan2 [...]]    : join channels
+	- leave #chan1 [#chan2 [...]]   : leave channels
+	- load plugin [plugin [...]]    : try to load one or more plugins
+	- mute                          : turn off all outputs'
+	- plugins                       : list loaded plugins
+	- quit
+	- search query [from=0] [count=5] [type=tweet|url|...] : search from db
+	- set variable [value]          : get or set a configuration variable
+	- unload plugin [plugin [...]]  : unload one or more plugin
+	- unmute                        : turn on all outputs
+	- uptime
+	- version
 
 plugin twitter commands
 -----------------------
 
-- follow tweetos
-- follower [regex]              : list followers
-- following [regex]             : list following
-- unfollow tweetos
+	- follow tweetos
+	- follower [regex]              : list followers
+	- following [regex]             : list following
+	- unfollow tweetos
 
 writing a plugin
 ----------------
@@ -76,15 +76,15 @@ to setup a default conf :
 to hook an event:
 
 available event are (with given parameters):
-- CONNECT    $cnx
-- DISCONNECT $cnx
-- MSG        $msg,$user,$from,$chan
-- JOIN       $chan
-- QUIT       $chan
-- USERJOIN   $user,$chan
-- USERQUIT   $user,$msg
-- NICKCHANGE $old,$new
-- TWEET      $msg,$user
+	- CONNECT    $cnx
+	- DISCONNECT $cnx
+	- MSG        $msg,$user,$from,$chan
+	- JOIN       $chan
+	- QUIT       $chan
+	- USERJOIN   $user,$chan
+	- USERQUIT   $user,$msg
+	- NICKCHANGE $old,$new
+	- TWEET      $msg,$user
 
 	use botaniko::hook;
 	use botaniko::irc;
@@ -99,7 +99,7 @@ to add a command:
 	command time=>{
 		help =>"display time",
 		root => 0,
-		bin=>sub{ [ ] }
+		bin=>sub{ [ scalar localtime ] }
 	};
 
 to async code:
