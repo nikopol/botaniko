@@ -1,6 +1,8 @@
 package botaniko::db;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use POSIX 'strftime';
 use ElasticSearch;
 

@@ -1,6 +1,8 @@
 package botaniko::plugin::linkmag;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use HTTP::Request;
 use JSON::XS;
 

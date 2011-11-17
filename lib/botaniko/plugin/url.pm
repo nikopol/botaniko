@@ -1,6 +1,8 @@
 package botaniko::plugin::url;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use HTTP::Request;
 use HTML::Entities;
 use Image::Info qw(image_info dim);

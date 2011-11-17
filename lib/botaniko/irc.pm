@@ -1,6 +1,8 @@
 package botaniko::irc;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use AnyEvent::IRC::Client;
 use Encode;
 

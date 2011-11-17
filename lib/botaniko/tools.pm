@@ -1,7 +1,10 @@
 package botaniko::tools;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 
+use LWP::UserAgent;
 use botaniko::logger;
 use botaniko::config;
 

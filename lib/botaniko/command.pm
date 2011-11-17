@@ -1,6 +1,8 @@
 package botaniko::command;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use Digest::SHA1 'sha1_hex';
 
 use botaniko::logger;

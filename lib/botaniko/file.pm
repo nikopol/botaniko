@@ -1,6 +1,8 @@
 package botaniko::file;
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use YAML::XS qw(DumpFile LoadFile);
 
 use base 'Exporter';
