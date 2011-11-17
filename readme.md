@@ -19,6 +19,17 @@ features
 - plugin twitter : management of a twitter account (retweet catched url and notice in irc its own timeline)
 - plugin url : keep trace of all url indexing them
 
+quick start
+-----------
+make sure elasticsearch is started
+
+	#show available options
+	bin/botaniko -help 
+	#first start
+	bin/botaniko -dbinit -c=mychannel -s=myircserver -n=mybotnick
+	#usual start
+	bin/botaniko
+
 core commands
 -------------
 
