@@ -73,7 +73,8 @@ hook TOTWEET=>sub {
 	1
 };
 
-async( 
+async(
+	id       => 'timeline',
 	cb       => sub{ get_twitter_timeline },
 	after    => 20,
 	interval => cfg('plugins.twitter.interval') || 120,

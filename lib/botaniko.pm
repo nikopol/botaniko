@@ -6,7 +6,9 @@ package botaniko;
 #  # #  #  # #### #  ## # # #
 ###   ##   # #  # #   # # #  #
 
-use Modern::Perl;
+use strict;
+use warnings;
+use 5.010;
 use Encode;
 use AnyEvent;
 use Digest::SHA1 'sha1_hex';
@@ -30,18 +32,29 @@ my %watch;
 my $exiting = 0;
 
 sub async {
+	my %prm  = @_;
 	my $plug = $botaniko::plugin::PLUGNAME;
 	trace DEBUG=>"adding async call for $plug";
-	$watch{$plug} = AnyEvent->timer( @_ );
+	my $k = 'plugin-'.$plug;
+	if( my $id = delete $prm{id} ) { $k .= '-'.$id }
+	$watch{$k} = AnyEvent->timer( %prm );
 }
 
 sub unasync {
 	my $plug = shift;
-	delete $watch{$plug};
+	for( keys %watch ) {
+		if( /^plugin-$plug/ ) {
+			trace DEBUG=>'remove async call '.$_;
+			delete $watch{$_};
+		}
+	}
 }
 
 sub plant {
 	loadcfg @_;
+	
+	trace NOTICE=>"starting botaniko v$VERSION";
+	
 	dbinit or return;
 
 	$w = AnyEvent->condvar;
