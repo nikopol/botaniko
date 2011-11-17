@@ -38,7 +38,7 @@ trace DEBUG=>"last tweet id set to ".cfg 'plugins.twitter.lastid';
 sub get_twitter_timeline {
 	return unless $twitter;
 	#trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.lastid');
-	my $timeline = eval { $twitter->friends_timeline({ count=>10, since_id=>cfg('plugins.twitter.lastid') }) };
+	my $timeline = eval { $twitter->home_timeline({ count=>10, since_id=>cfg('plugins.twitter.lastid') }) };
 	if( my $err = $@ ) {
 		trace ERROR=>'twitter '.$err->error;
 	} elsif( $$timeline[0] ) {
