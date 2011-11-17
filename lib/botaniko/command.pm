@@ -143,7 +143,7 @@ $commands = {
 		}
 	},
 	set => {
-		help => 'set variable [value] : get or set a configuration variable',
+		help => 'set variable [value] : get or set a configuration setting',
 		root => 1,
 		bin  => sub {
 			my $k = shift;
@@ -162,11 +162,17 @@ $commands = {
 				$v = sha1_hex($v) if $k eq 'passphrase';
 				cfg $k=>$v;
 			}
-			my $out = [];
+			my %set;
+			my $len = 0;
 			for( @$r ) {
 				$v = $_ =~ /passphrase|secret/ ? ('*' x length($cfg->{$_})) : cfg($_);
-				push @$out, substr((' ' x 36).$_,-36)." = $v";
+				$v .= ' ('.delay(cfg($_)).')' if /^records\..+\.score$/;
+				$set{$_} = $v;
+				$len = length($_) if length($_) > $len;
 			};
+			my $out = [];
+			push( @$out, substr((' ' x $len).$_,-$len).' = '.$set{$_} )
+				for sort keys %set;
 			my $count = @$out;
 			$out = [ splice(@$out,0,10), "...truncated from $count matching variables" ]
 				if $count > 10;
