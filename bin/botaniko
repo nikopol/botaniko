@@ -15,6 +15,8 @@ use botaniko;
 my %opt;
 
 GetOptions(
+	"help|h|?"          => \my $help,
+	"config|cfg=s"      => \$opt{'config'},
 	"server|s=s"        => \$opt{'server.host'},
 	"port|p=i"          => \$opt{'server.port'},
 	"nick|name|n=s"     => \$opt{'nick'},
@@ -27,12 +29,34 @@ GetOptions(
 	"plugins=s"         => \$opt{'autoload'},
 );
 
+if( $help ) {
+	print <<EOHELP
+BoTaNiKo $botaniko::VERSION
+le bot qui plante... ou pas
+
+options (none required, default values indicated):
+
+  -cfg=./botaniko.yml   config file
+  -s=irc.freenode.net   irc server hostname
+  -p=6667               irc server port
+  -c=botaniko           channels to join separated with ,
+  -ll=info              log level (error>warning>notice>info>debug)
+  -dbinit               erase and define elasticsearch botaniko's db
+  -mute                 setup mute mode
+  -plugins=twitter,url  autoload these plugins
+
+EOHELP
+	;
+	exit 1
+}
+
+
 if( $opt{channels} ) {
 	$opt{channels} = [ split /,/,$opt{channels} ]
 }
 if( $opt{loglevel} ) {
 	$opt{loglevel} = uc $opt{loglevel};
-	$opt{loglevel} = 'DEBUG' unless $opt{loglevel} =~ /^(ERROR|WARN|NOTICE|INFO|TWEET|DEBUG)$/;
+	$opt{loglevel} = 'DEBUG' unless $opt{loglevel} =~ /^(ERROR|WARN|WARNING|NOTICE|INFO|TWEET|DEBUG)$/;
 }
 if( $opt{autoload} ) {
 	$opt{autoload} = [ split /,/,$opt{autoload} ]
