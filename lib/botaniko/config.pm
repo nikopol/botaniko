@@ -13,7 +13,7 @@ my $cfgfile = 'botaniko.yml';
 my $cfg = {
 	server     => { host => 'irc.freenode.net', port => 6667 },
 	nick       => 'bot4nik',
-	channels   => [ 'rtgi' ],
+	channels   => [ 'botaniko' ],
 	loglevel   => 'INFO',
 	mute       => 0,
 	passphrase => '9b77f2db9bfb3ddbbd9267f9cc3ea2c28a5b9234',
