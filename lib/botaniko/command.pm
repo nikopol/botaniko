@@ -18,6 +18,13 @@ my $startime = time;
 
 my $commands;
 $commands = {
+	channels => {
+		help => 'channels : list channels',
+		root => 1,
+		bin  => sub {
+			[ channels() ]
+		}
+	},
 	help => {
 		help => 'help [command]',
 		bin  => sub {
@@ -40,11 +47,12 @@ $commands = {
 			my $auto = cfg 'channels';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
 			my @chans = channels;
-			for( @_ ) {
-				push( @$auto, $_ ) unless $_ ~~ @$auto;
-				unless( $_ ~~ @chans ) {
-					push @$out, 'joining '.$_;
-					join_channel $_;
+			for my $c ( @_ ) {
+				$c = '#'.$c unless $c =~ m/^#/;
+				push( @$auto, $_ ) unless $c ~~ @$auto;
+				unless( $c ~~ @chans ) {
+					push @$out, 'joining '.$c;
+					join_channel $c;
 				}
 			}
 			cfg channels=>$auto;
@@ -60,10 +68,11 @@ $commands = {
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
 			my @chans = channels;
 			for my $c ( @_ ) {
+				$c = '#'.$c unless $c =~ m/^#/;
 				$auto = [ grep { $c ne $_ } @$auto ];
 				if( $c ~~ @chans ) {
-					push @$out, 'leaving '.$_;
-					leave_channel $_;
+					push @$out, 'leaving '.$c;
+					leave_channel $c;
 				}
 			}
 			cfg channels=>$auto;
@@ -272,7 +281,7 @@ sub run {
 				push @out,pickone(
 					'what?!',
 					'could you be more explicit ?',
-					'you\'re talking to me ?',
+					"you re talking to me ?",
 					'this is not implemented yet',
 					'what do you mean ?',
 				)
