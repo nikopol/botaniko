@@ -1,23 +1,23 @@
 botaniko
 ========
 
-is an IRC Bot "qui plante... ou pas"
-(c) niko - under the [artistic license](http://www.perlfoundation.org/artistic_license_1_0)
-alpha version.
+is an IRC Bot "qui plante... ou pas"  
+(c) niko - under the [artistic license](http://www.perlfoundation.org/artistic_license_1_0)  
+alpha version.  
+
+features
+--------
+
+- multi channels
+- write easily your own plugins (see below and lib/botaniko/plugin/*.pm)
+- plugin twitter : management of a twitter account (retweet catched url and notice in irc its own timeline)
+- plugin url : keep trace of all url indexing them
 
 requires
 --------
 
 - elasticsearch
 - perl modules
-
-features
---------
-
-- multi channels
-- easy way to be personalized, creating a plugin (see lib/botaniko/plugin/*.pm)
-- plugin twitter : management of a twitter account (retweet catched url and notice in irc its own timeline)
-- plugin url : keep trace of all url indexing them
 
 quick start
 -----------
@@ -59,9 +59,9 @@ writing a plugin
 ----------------
 
 you can easyly setup a default configuration, hook events, 
-add commands, and delay/repeat code.
-your plugin must be a module under botaniko::plugin::
-see lib/botaniko/plugin/*.pm to see samples.
+add commands, and delay/repeat code.  
+your plugin must be a module under botaniko::plugin::  
+see lib/botaniko/plugin/*.pm to see samples.  
 
 to setup a default conf :
 
@@ -76,15 +76,15 @@ to setup a default conf :
 to hook an event:
 
 available event are (with given parameters):
-	- CONNECT    $cnx
-	- DISCONNECT $cnx
-	- MSG        $msg,$user,$from,$chan
-	- JOIN       $chan
-	- QUIT       $chan
-	- USERJOIN   $user,$chan
-	- USERQUIT   $user,$msg
-	- NICKCHANGE $old,$new
-	- TWEET      $msg,$user
+- CONNECT    $cnx
+- DISCONNECT $cnx
+- MSG        $msg,$user,$from,$chan
+- JOIN       $chan
+- QUIT       $chan
+- USERJOIN   $user,$chan
+- USERQUIT   $user,$msg
+- NICKCHANGE $old,$new
+- TWEET      $msg,$user
 
 	use botaniko::hook;
 	use botaniko::irc;
