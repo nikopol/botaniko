@@ -7,18 +7,18 @@ use 5.010;
 use botaniko::file;
 
 use base 'Exporter';
-our @EXPORT = qw(cfg loadcfg cfg_default flatcfg);
+our @EXPORT = qw(cfg chancfg loadcfg cfg_default chancfg_default set_chan_default flatcfg);
 
 my $cfgfile = 'botaniko.yml';
 my $cfg = {
 	server     => { host => 'irc.freenode.net', port => 6667 },
 	nick       => 'bot4nik',
-	channels   => [ 'botaniko' ],
 	loglevel   => 'INFO',
 	mute       => 0,
 	passphrase => '9b77f2db9bfb3ddbbd9267f9cc3ea2c28a5b9234',
-	lwp        => { timeout => 20, agent => 'B0T4NiK/0.1' },
+	lwp        => { timeout => 20, agent => 'B0T4NiK/0.4' },
 	autoload   => [],
+	autojoin   => [],
 	db         => {
 		servers      => '127.0.0.1:9200',
 		transport    => 'http',
@@ -27,6 +27,7 @@ my $cfg = {
 		no_refresh   => 0,
 	},
 };
+my %chandft;
 
 sub cfg {
 	return $cfg unless @_;
@@ -47,6 +48,12 @@ sub cfg {
 	$b->{$key}
 }
 
+sub chancfg {
+	my( $chan, $key ) = ( shift, shift );
+	$chan =~ s/^#//;
+	cfg( "channels.$chan.$key", @_ )
+}
+
 sub loadcfg {
 	my %prm = @_;
 	if( my $file = delete $prm{config} ) {
@@ -64,6 +71,24 @@ sub cfg_default {
 	cfg( $key=>$val ) unless defined cfg $key;
 }
 
+sub set_chan_default {
+	my $chans = shift;
+	$chans = [ $chans ] unless ref($chans) eq 'ARRAY';
+	for my $c ( @$chans ) {
+		$c =~ s/^#//;
+		for my $d ( keys %chandft ) {
+			my $k = "channels.$c.$d";
+			cfg( $k => $chandft{$d} ) unless defined cfg $k;
+		}
+	}
+}
+
+sub chancfg_default {
+	my( $key, $val ) = @_;
+	$chandft{$key} = $val;
+	set_chan_default [ botaniko::irc::channels() ]
+}
+
 sub flatcfg {
 	my($tree,$pfx,$flat) = @_;
 	unless( defined $tree ) {
@@ -74,7 +99,7 @@ sub flatcfg {
 	for( keys %$tree ) {
 		if( ref($tree->{$_}) eq 'ARRAY' )   { $flat->{"$pfx$_"} = join(',',@{$tree->{$_}}) }
 		elsif( ref($tree->{$_}) eq 'HASH' ) { $flat = flatcfg( $tree->{$_}, "$pfx$_.", $flat ) }
-		else                                { $flat->{"$pfx$_"} = "$tree->{$_}" }
+		else                                { $flat->{"$pfx$_"} = defined $tree->{$_} ? "$tree->{$_}" : 'undefined' }
 	}
 	$flat
 }

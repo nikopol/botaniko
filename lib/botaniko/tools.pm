@@ -9,7 +9,7 @@ use botaniko::logger;
 use botaniko::config;
 
 use base 'Exporter';
-our @EXPORT = qw(admin error delay useragent record pickone);
+our @EXPORT = qw(admin error delay useragent record pickone trunc);
 
 sub error {
 	$@ = shift;
@@ -63,5 +63,16 @@ sub admin {
 }
 
 sub pickone { $_[ int(rand(scalar @_)) ] }
+
+sub trunc {
+	my( $out, $max ) = @_;
+	$max = 5 if !$max || $max<1 || $max>10;
+	my $count = scalar @$out;
+	$out = [
+		splice( @$out, 0, $max ),
+		"...truncated from $count lines"
+	] if $count > $max;
+	$out
+}
 
 1

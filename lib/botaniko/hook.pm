@@ -20,7 +20,7 @@ my %hooks;
 # USERQUIT   $user,$msg
 # NICKCHANGE $old,$new
 # TWEET      $msg,$user
-# TOTWEET    $msg
+# TOTWEET    $msg,$user,$chan
 
 sub hook {
 	my( $hook, $sub ) = @_;

@@ -25,7 +25,7 @@ use botaniko::tools;
 use base 'Exporter';
 our @EXPORT = qw(plant async unasync);
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 our $w;
 my %watch;
@@ -52,13 +52,10 @@ sub unasync {
 
 sub plant {
 	loadcfg @_;
-	
 	trace NOTICE=>"starting botaniko v$VERSION";
-	
 	dbinit or return;
 
-	$w = AnyEvent->condvar;
-	
+	$w = AnyEvent->condvar;	
 	
 	irc->reg_cb(
 		connect => sub {
@@ -79,7 +76,7 @@ sub plant {
 				plugin($_) for @$plugs;
 			}
 			#join channels
-			if( my $chans = cfg 'channels' ) {
+			if( my $chans = cfg 'autojoin' ) {
 				$chans = [ $chans ] unless ref($chans) eq 'ARRAY';
 				join_channel($_) for @$chans;
 			}
@@ -103,6 +100,7 @@ sub plant {
 			my( $cnx, $nick, $chan, $myself ) = @_;
 			if( $myself ) {
 				trace NOTICE=>"joined $chan";
+				set_chan_default $chan;
 				fire JOIN=>$chan;
 			} else {
 				trace INFO=>"$nick joined $chan";

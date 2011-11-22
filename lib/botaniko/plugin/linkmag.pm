@@ -65,14 +65,7 @@ command
 				return [ 'youmag api returned '.$r->status_line ] unless $r->is_success;
 				$themes = decode_json( $r->decoded_content );
 			}
-			my $out	  = [ grep { $_ =~ $regex } @$themes ];
-			my $count = scalar @$out;
-			if( $count > 5 ) {
-				$out = [ 
-					splice( @$out, 0, 5 ),
-					"...truncated from $count matching results"
-				]
-			}
+			my $out = trunc( [ grep { $_ =~ $regex } @$themes ] );
 			$out or ['not found']
 		}
 	};

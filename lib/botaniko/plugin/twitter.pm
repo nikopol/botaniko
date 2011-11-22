@@ -14,14 +14,17 @@ use botaniko::db;
 use botaniko::irc;
 
 cfg_default 'plugins.twitter' => {
-	name                => 'your_twitter_account_name',
+	name                => 'your_bot_twitter_account_name',
 	consumer_key        => 'your_consumer_key',
 	consumer_secret     => 'your_consumer_secret',
 	access_token        => 'your_access_token',
 	access_token_secret => 'your_access_token_secret',
-	echo                => 1,
 	interval            => 120,
 	lastid              => 0,
+};
+
+chancfg_default 'plugins.twitter' => {
+	echo                => 1,
 };
 
 my $twitter = Net::Twitter->new( traits=>['API::REST', 'OAuth'], %{cfg('plugins.twitter')} );
@@ -114,9 +117,7 @@ command
 			my $count = @$r;
 			my $out = [];
 			push( @$out, join(',', splice(@$r,0,4>@$r?scalar @$r:4)) ) while @$r;
-			$out = [ splice(@$out,0,10), "...truncated from $count followers" ]
-				if @$out > 10;
-			@$out ? $out : [ '...nobody' ]
+			@$out ? trunc( $out ) : [ '...nobody' ]
 		}
 	},
 	following => {
@@ -137,9 +138,7 @@ command
 			my $count = @$r;
 			my $out = [];
 			push( @$out, join(',', splice(@$r,0,4>@$r?scalar @$r:4)) ) while @$r;
-			$out = [ splice(@$out,0,10), "...truncated from $count followings" ]
-				if @$out > 10;
-			@$out ? $out : [ '...nobody' ]
+			@$out ? trunc( $out ) : [ '...nobody' ]
 		}
 	},
 	unfollow => {

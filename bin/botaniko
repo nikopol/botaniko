@@ -20,7 +20,7 @@ GetOptions(
 	"server|s=s"        => \$opt{'server.host'},
 	"port|p=i"          => \$opt{'server.port'},
 	"nick|name|n=s"     => \$opt{'nick'},
-	"channels|chan|c=s" => \$opt{'channels'},
+	"channels|chan|c=s" => \$opt{'autojoin'},
 	"log|loglevel|ll=s" => \$opt{'loglevel'},
 	"dbdebug"           => \$opt{'db.trace_calls'},
 	"dbinit"            => \$opt{'db.init'},
@@ -51,8 +51,8 @@ EOHELP
 }
 
 
-if( $opt{channels} ) {
-	$opt{channels} = [ split /,/,$opt{channels} ]
+if( $opt{autojoin} ) {
+	$opt{autojoin} = [ split /,/,$opt{autojoin} ]
 }
 if( $opt{loglevel} ) {
 	$opt{loglevel} = uc $opt{loglevel};

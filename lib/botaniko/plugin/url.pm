@@ -17,7 +17,7 @@ use botaniko::hook;
 use botaniko::command;
 use botaniko::irc;
 
-cfg_default	'plugins.url' => {
+chancfg_default 'plugins.url' => {
 	echo       => 0,
 	test_tweet => 0,
 	test_url   => 1,
@@ -64,14 +64,14 @@ sub process_url {
 	}
 	return if $url =~ m|^https?://twitter.com$|;
 	my $s = dbsearchterm 'url','url',$url;
-	if( $s && $s->{hits}->{total} && cfg('plugins.url.test_url') && ($chan ne 'twitter' || cfg('plugins.url.test_tweet')) ) {
+	if( $s && $s->{hits}->{total} && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
 		my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
 		my $z = $parsedt->parse_datetime(strftime("%Y-%m-%d %H:%M:%S",localtime(time)))->epoch - $e;
 		send_channel( $chan=>$nick.': old link !p since '.delay($z).' '.record(oldlink=>$z,$nick) );
 		send_channel( $chan=>$_->{_source}->{date}.' @'.$_->{_source}->{name}.': '.$_->{_source}->{text} )
 			for @{$s->{hits}->{hits}};
 	} else {
-		if( cfg('plugins.url.echo') ) {
+		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.echo') ) {
 			my $out;
 			$out = $url.' => type: '.$type if $type;
 			$out = $url.' => "'.$title.'"' if $title;
@@ -88,12 +88,9 @@ sub process_url {
 			title=> $title,
 			meta => $url,
 		} };
-		if( $chan ne 'twitter' && 
-			cfg('plugins.url.tweet_url') && 
-			$text !~ /notweet/
-		) {
+		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.tweet_url') && $text !~ /notweet/ ) {
 			$text =~ s/^[^\s\:]+\:\s+//;
-			fire TOTWEET=>$text;
+			fire TOTWEET=>$text,$nick,$chan;
 		}
 	}
 }

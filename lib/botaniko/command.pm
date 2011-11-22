@@ -44,7 +44,7 @@ $commands = {
 		root => 1,
 		bin  => sub {
 			my $out = [];
-			my $auto = cfg 'channels';
+			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
 			my @chans = channels;
 			for my $c ( @_ ) {
@@ -55,7 +55,7 @@ $commands = {
 					join_channel $c;
 				}
 			}
-			cfg channels=>$auto;
+			cfg autojoin=>$auto;
 			$out
 		}
 	},
@@ -64,7 +64,7 @@ $commands = {
 		root => 1,
 		bin  => sub {
 			my $out = [];
-			my $auto = cfg 'channels';
+			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
 			my @chans = channels;
 			for my $c ( @_ ) {
@@ -75,7 +75,7 @@ $commands = {
 					leave_channel $c;
 				}
 			}
-			cfg channels=>$auto;
+			cfg autojoin=>$auto;
 			$out
 		}
 	},
@@ -158,12 +158,13 @@ $commands = {
 		root => 1,
 		bin  => sub {
 			my $k = shift;
+			shift @_ if @_ && $_[0] eq '=';
 			my $v = @_ ? join(' ',@_) : undef;
 			my $regex = $k ? qr/$k/i : qr/./;
 			my $cfg = flatcfg;
 			my $r = [ sort grep { $_ =~ $regex } keys %$cfg ];
 			return [ 'unknown variable' ] unless @$r;
-			if( $v && 1 == @$r ) {
+			if( defined $v && 1 == @$r ) {
 				$v = 1 if lc($v) eq 'true'  || lc($v) eq 'on';
 				$v = 0 if lc($v) eq 'false' || lc($v) eq 'off';
 				my $cur = cfg($k);
@@ -182,12 +183,9 @@ $commands = {
 				$len = length($_) if length($_) > $len;
 			};
 			my $out = [];
-			push( @$out, substr((' ' x $len).$_,-$len).' = '.$set{$_} )
+			push( @$out, substr((' ' x $len).$_,-$len).' = '.(defined $set{$_} ? $set{$_} : 'undefined' ))
 				for sort keys %set;
-			my $count = @$out;
-			$out = [ splice(@$out,0,10), "...truncated from $count matching variables" ]
-				if $count > 10;
-			@$out ? $out : [ '...no match' ]
+			@$out ? trunc( $out, 10 ) : [ '...no match' ]
 		}
 	},
 	unload => {
