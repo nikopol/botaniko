@@ -40,43 +40,39 @@ $commands = {
 		}
 	},
 	join => {
-		help => 'join #chan1 [#chan2 [...]] : join channels',
+		help => 'join #chan : join a channel',
 		root => 1,
 		bin  => sub {
-			my $out = [];
+			my $chan = shift;
+			return ['what channel ?'] unless $chan;
+			$chan = '#'.$chan unless $chan =~ m/^#/;
+			my @chans = channels;
+			return ['i am already in '.$chan] if $chan ~~ @chans;
+			join_channel $chan;
 			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
-			my @chans = channels;
-			for my $c ( @_ ) {
-				$c = '#'.$c unless $c =~ m/^#/;
-				push( @$auto, $_ ) unless $c ~~ @$auto;
-				unless( $c ~~ @chans ) {
-					push @$out, 'joining '.$c;
-					join_channel $c;
-				}
+			unless( $chan ~~ @$auto ) {
+				push @$auto, $chan;
+				cfg autojoin=>$auto;
 			}
-			cfg autojoin=>$auto;
-			$out
+			['joining '.$chan]
 		}
 	},
 	leave => {
-		help => 'leave #chan1 [#chan2 [...]] : leave channels',
+		help => 'leave #chan : leave a channels',
 		root => 1,
 		bin  => sub {
-			my $out = [];
+			my $chan = shift;
+			return ['what channel ?'] unless $chan;
+			$chan = '#'.$chan unless $chan =~ m/^#/;
+			my @chans = channels;
+			return ['i am not in '.$chan] unless $chan ~~ @chans;
+			leave_channel $chan;
 			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
-			my @chans = channels;
-			for my $c ( @_ ) {
-				$c = '#'.$c unless $c =~ m/^#/;
-				$auto = [ grep { $c ne $_ } @$auto ];
-				if( $c ~~ @chans ) {
-					push @$out, 'leaving '.$c;
-					leave_channel $c;
-				}
-			}
+			$auto = [ grep { $_ ne $chan } @$auto ];
 			cfg autojoin=>$auto;
-			$out
+			['leaving '.$chan]
 		}
 	},
 	load => {

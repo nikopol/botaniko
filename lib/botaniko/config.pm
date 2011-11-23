@@ -78,7 +78,7 @@ sub set_chan_default {
 		$c =~ s/^#//;
 		for my $d ( keys %chandft ) {
 			my $k = "channels.$c.$d";
-			cfg( $k => $chandft{$d} ) unless defined cfg $k;
+			cfg( $k => { %{$chandft{$d}} } ) unless defined cfg $k;
 		}
 	}
 }
