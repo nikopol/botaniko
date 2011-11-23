@@ -52,7 +52,7 @@ EOHELP
 
 
 if( $opt{autojoin} ) {
-	$opt{autojoin} = [ split /,/,$opt{autojoin} ]
+	$opt{autojoin} = [ map { m/^#/ ? $_ : "#$_" } split /,/,$opt{autojoin} ]
 }
 if( $opt{loglevel} ) {
 	$opt{loglevel} = uc $opt{loglevel};
