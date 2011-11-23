@@ -9,7 +9,7 @@ use botaniko::logger;
 use botaniko::config;
 
 use base 'Exporter';
-our @EXPORT = qw(admin error delay useragent record pickone trunc);
+our @EXPORT = qw(admin error delay useragent record pickone trunc getoptions);
 
 sub error {
 	$@ = shift;
@@ -73,6 +73,22 @@ sub trunc {
 		"...truncated from $count lines"
 	] if $count > $max;
 	$out
+}
+
+sub getoptions {
+	my $prm = shift;
+	$prm = [ grep { length $_ } map { s/(^\s+|\s+$)//g; $_ } @$prm ];
+	my @opt;
+	for my $o ( @_ ) {
+		if( my @found = grep { /^$o=/ } @$prm ) {
+			$prm = [ grep { $_ !~ /^$o=/ } @$prm ];
+			@found = map { s/^$o=//; $_ } @found;
+			push @opt, $found[0];
+		} else {
+			push @opt, undef;
+		}
+	}
+	( $prm, @opt )
 }
 
 1
