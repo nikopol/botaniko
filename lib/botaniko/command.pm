@@ -255,7 +255,7 @@ sub run {
 		trace INFO=>"$nick want $what";
 		my @args = split /\s/,$what;
 		my $c = shift @args;
-		if( $c ) {
+		if( $c && exists $commands->{$c} ) {
 			if( my $bin = $commands->{$c}->{bin} ) {
 				if( $commands->{$c}->{root} && !admin($from) ) {
 					push @out,pickone(
@@ -272,14 +272,17 @@ sub run {
 					@out    = $r ? @$r : ( &$hlp(admin($from),$c) );
 				}
 			} else {
-				push @out,pickone(
-					'what?!',
-					'could you be more explicit ?',
-					"you re talking to me ?",
-					'this is not implemented yet',
-					'what do you mean ?',
-				)
+				trace ERROR=>"no bin provided for command $c";
+				push @out, "command got no code";
 			}
+		} else {
+			push @out,pickone(
+				'what?!',
+				'could you be more explicit ?',
+				"you re talking to me ?",
+				'this is not implemented yet',
+				'what do you mean ?',
+			)
 		}
 	}
 	trace( DEBUG=>$_ ) for @out;
