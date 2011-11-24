@@ -59,8 +59,10 @@ sub get_twitter_timeline {
 					created => $tweet->{created_at}
 				};
 				trace TWEET=>"$name: $text";
-				notify( all=>'@'.$name.': '.$text )
-					if cfg('plugins.twitter.echo');
+				for my $chan ( channels() ) {
+					notify( $chan=>'@'.$name.': '.$text )
+						if chancfg($chan,'plugins.twitter.echo');
+				}
 				fire TWEET=>$text,$name;
 			}
 		}
