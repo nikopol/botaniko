@@ -10,6 +10,7 @@ use botaniko::config;
 use botaniko::plugin;
 use botaniko::tools;
 use botaniko::irc;
+use botaniko::db;
 
 use base 'Exporter';
 our @EXPORT = qw(run command);
@@ -120,23 +121,12 @@ $commands = {
 		}
 	},
 	search => {
-		help => 'search query [from=0] [count=5] [type=tweet|url|...] : search from db',
+		help => 'search query [from=0] [count=5] [type=tweet,url,...] : search from db',
 		bin  => sub {
-			return unless @_;
+			my( $qry, $from, $size, $type ) = getoptions(\@_,from=>0,count=>5,type=>'tweet,url');
+			$qry = join(' ',@$qry);
+			return [ 'what are you searching for ?' ] unless $qry;
 			my $out = [];
-			my @arg;
-			my $from = 0;
-			my $size = 5;
-			my $type;
-			for( @_ ) { 
-				if( m/^from[:=](\d+)/i )     { $from=0+$1 }
-				elsif( m/^count[:=](\d+)/i ) { $size=0+$1 }
-				elsif( m/^type[:=](\S+)/i )  { $type=lc $1 }
-				else { push @arg, $_ }
-			}
-			my $qry = join(' ',@arg);
-			$qry =~ s/^\s+|\s+$//g;
-			return unless $qry;
 			$size = 5 if $size<0 || $size>10;
 			$from = 0 if $from<0;
 			my $r = eval{ dbsearch( $type, $qry, $from, $size ) };
@@ -145,6 +135,8 @@ $commands = {
 				push( @$out, '#'.($n++).' '.$_->{_source}->{date}.' @'.$_->{_source}->{name}.': '.$_->{_source}->{text} )
 					for @{$r->{hits}->{hits}};
 				push @$out, '... '.$r->{hits}->{total}.' matches';
+			} else {
+				push @$out, 'no match';
 			}
 			$out
 		}
