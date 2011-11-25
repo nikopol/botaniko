@@ -22,10 +22,9 @@ cfg_default 'plugins.wikipedia' => {
 command wikipedia => {
 	help => "wikipedia query [lang=fr]",
 	bin  => sub {
-		my( $qry, $loc ) = getoptions(\@_,'lang');
+		my( $qry, $loc ) = getoptions(\@_,lang=>cfg 'plugins.wikipedia.loc');
 		$qry = join(' ',@$qry);
 		return [ 'what are you searching for ?' ] unless $qry;
-		$loc ||= cfg 'plugins.wikipedia.loc';
 		my $url = sprintf cfg('plugins.wikipedia.api'), $loc, $qry;
 		trace DEBUG=>'loading '.$url;
 		my $r = useragent->get( $url );
