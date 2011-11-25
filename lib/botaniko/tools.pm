@@ -79,13 +79,14 @@ sub getoptions {
 	my $prm = shift;
 	$prm = [ grep { length $_ } map { s/(^\s+|\s+$)//g; $_ } @$prm ];
 	my @opt;
-	for my $o ( @_ ) {
+	while( @_ ) {
+		my($o,$v) = (shift,shift);
 		if( my @found = grep { /^$o=/ } @$prm ) {
 			$prm = [ grep { $_ !~ /^$o=/ } @$prm ];
 			@found = map { s/^$o=//; $_ } @found;
 			push @opt, $found[0];
 		} else {
-			push @opt, undef;
+			push @opt, $v;
 		}
 	}
 	( $prm, @opt )
