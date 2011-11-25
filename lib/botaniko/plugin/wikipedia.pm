@@ -5,6 +5,7 @@ use warnings;
 use 5.010;
 
 use HTML::Entities;
+use URI::Escape;
 use JSON::XS;
 
 use botaniko::config;
@@ -13,7 +14,8 @@ use botaniko::command;
 use botaniko::tools;
 
 cfg_default 'plugins.wikipedia' => {
-	url => "http://%s.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&srsearch=%s&format=json",
+	api => "http://%s.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&srsearch=%s&format=json",
+	url => "http://%s.wikipedia.org/wiki/%s",
 	loc => "en",
 };
 
@@ -24,7 +26,7 @@ command wikipedia => {
 		$qry = join(' ',@$qry);
 		return [ 'what are you searching for ?' ] unless $qry;
 		$loc ||= cfg 'plugins.wikipedia.loc';
-		my $url = sprintf cfg('plugins.wikipedia.url'), $loc, $qry;
+		my $url = sprintf cfg('plugins.wikipedia.api'), $loc, $qry;
 		trace DEBUG=>'loading '.$url;
 		my $r = useragent->get( $url );
 		unless( $r->is_success ) {
@@ -38,7 +40,10 @@ command wikipedia => {
 			my $l = $w->{query}->{search}->[0]->{snippet};
 			$l =~ s/<[^<>]+>//g;
 			$l =~ s/\s+/ /g;
-			return [ decode_entities( $l ) ];
+			return [
+				decode_entities( $l ),
+				sprintf(cfg('plugins.wikipedia.url'),$loc,uri_escape($qry))
+			]
 		}
 		[ 'nothing found' ];
 	}
