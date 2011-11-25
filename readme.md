@@ -25,27 +25,34 @@ make sure elasticsearch is started
 
 	#show available options
 	bin/botaniko -help 
+
 	#first start
-	bin/botaniko -dbinit -c=mychannel -s=myircserver -n=mybotnick
+	bin/botaniko -dbinit -c=mychannel -s=myircserver -n=mybotnick -pass=mypassphrase
+
 	#usual start
 	bin/botaniko
 
 core commands
 -------------
 
+basics:
+
 	- help [command]
-	- join #chan1 [#chan2 [...]]    : join channels
-	- leave #chan1 [#chan2 [...]]   : leave channels
-	- load plugin [plugin [...]]    : try to load one or more plugins
-	- mute                          : turn off all outputs'
-	- plugins                       : list loaded plugins
-	- quit
-	- search query [from=0] [count=5] [type=tweet|url|...] : search from db
-	- set variable [value]          : get or set a configuration variable
-	- unload plugin [plugin [...]]  : unload one or more plugin
-	- unmute                        : turn on all outputs
+	- mute                : turn off all outputs'
 	- uptime
 	- version
+	- search query [from=0] [count=5] [type=tweet|url|...] : search from db
+	- unmute              : turn on all outputs
+
+admins: (requires admin access, granted by /msg mybot passphrase)
+
+	- join #mychan        : join channels
+	- leave #mychan       : leave channels
+	- load plugin         : try to load one or more plugins
+	- plugins             : list loaded plugins
+	- quit
+	- set variable [[=] value] : get or set a configuration variable
+	- unload plugin [plugin [...]] : unload one or more plugin
 
 plugin twitter commands
 -----------------------
@@ -66,25 +73,36 @@ see lib/botaniko/plugin/*.pm to see samples.
 to setup a default conf :
 
 	use botaniko::config;
+	#global config
 	cfg_default 'plugins.quiz' => {
-		quiz => [
+		version => 1
+		quiz    => [
 			{ query=>'what is the answer?', answer=>42 }
 		]
 	};
+	#per channel config
+	chancfg_default 'plugins.quiz' => {
+		playable => 1
+	};
 
+to read conf :
+
+	if( chancfg($chan,'plugins.quiz.playable') ) {
+		send_channel $chan=>'quiz v'.cfg 'plugins.quiz.version'
+	}
 
 to hook an event:
 
 available event are (with given parameters):
-- CONNECT    $cnx
-- DISCONNECT $cnx
-- MSG        $msg,$user,$from,$chan
-- JOIN       $chan
-- QUIT       $chan
-- USERJOIN   $user,$chan
-- USERQUIT   $user,$msg
-- NICKCHANGE $old,$new
-- TWEET      $msg,$user
+- CONNECT    $cnx  
+- DISCONNECT $cnx  
+- MSG        $msg,$user,$from,$chan  
+- JOIN       $chan  
+- QUIT       $chan  
+- USERJOIN   $user,$chan  
+- USERQUIT   $user,$msg  
+- NICKCHANGE $old,$new  
+- TWEET      $msg,$user  
 
 	use botaniko::hook;
 	use botaniko::irc;
