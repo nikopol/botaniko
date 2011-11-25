@@ -11,6 +11,7 @@ requires( 'YAML::XS' );
 requires( 'AnyEvent::IRC::Client' );
 requires( 'Class::Unload' );
 requires( 'LWP::UserAgent' );
+requires( 'Getopt::Long' );
 
 #plugins
 requires( 'Net::Twitter' );
