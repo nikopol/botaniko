@@ -10,9 +10,13 @@ use strict;
 use warnings;
 use 5.010;
 use Getopt::Long;
+use Digest::SHA1 'sha1_hex';
 use botaniko;
 
-my %opt;
+my %opt = ( 
+	'db.disabled'   =>0,
+	'db.trace_calls'=>0,
+);
 
 GetOptions(
 	"help|h|?"          => \my $help,
@@ -24,9 +28,12 @@ GetOptions(
 	"log|loglevel|ll=s" => \$opt{'loglevel'},
 	"dbdebug"           => \$opt{'db.trace_calls'},
 	"dbinit"            => \$opt{'db.init'},
+	"dbtrace"           => \$opt{'db.trace_calls'},
+	"nodb"              => \$opt{'db.disabled'},
 	"tweetid|tid=i"     => \$opt{'plugins.twitter.lastid'},
 	"mute|quiet|silent" => \$opt{'mute'},
 	"plugins=s"         => \$opt{'autoload'},
+	"pass=s"            => \$opt{'passphrase'},
 );
 
 if( $help ) {
@@ -41,9 +48,12 @@ options (none required, default values indicated):
   -p=6667               irc server port
   -c=botaniko           channels to join separated with ,
   -ll=info              log level (error>warning>notice>info>debug)
-  -dbinit               erase and define elasticsearch botaniko's db
   -mute                 setup mute mode
   -plugins=twitter,url  autoload these plugins
+  -dbinit               erase and define elasticsearch botaniko's db
+  -dbtrace              debug purpose
+  -nodb                 start without db
+  "-pass=pass phrase"   setup passphrase for root access
 
 EOHELP
 	;
@@ -60,6 +70,9 @@ if( $opt{loglevel} ) {
 }
 if( $opt{autoload} ) {
 	$opt{autoload} = [ split /,/,$opt{autoload} ]
+}
+if( $opt{passphrase} ) {
+	$opt{passphrase} = sha1_hex $opt{passphrase};
 }
 
 plant %opt;
