@@ -93,7 +93,7 @@ to read conf :
 
 to hook an event:
 
-available event are (with given parameters):
+available event are (with given parameters):  
 - CONNECT    $cnx  
 - DISCONNECT $cnx  
 - MSG        $msg,$user,$from,$chan  
