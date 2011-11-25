@@ -19,6 +19,7 @@ my $es;
 sub dbinit {
 	return trace( ERROR=>'db elasticsearch is not configured' )
 		unless my $cfg = cfg 'db';
+	return 1 if delete $cfg->{disabled};
 	my $init = delete $cfg->{init};
 	$es  = ElasticSearch->new( %$cfg );
 	my $esv = eval { $es->current_server_version };
@@ -71,6 +72,7 @@ sub dbinit {
 
 sub dbindex {
 	my( $type, $data ) = @_;
+	return unless $es;
 	trace DEBUG=>'indexing '.$type.' '.$data->{text};
 	eval { $es->index(
 		index => IDXNAME,
@@ -84,7 +86,8 @@ sub dbindex {
 
 sub dbsearch {
 	my( $type, $qry, $from, $size ) = @_;
-	trace DEBUG=>'searching '.$type.' '.$qry;
+	return trace( WARN=>'db disabled' ) unless $es;
+	trace DEBUG=>'searching '.($type?$type.' ':'').$qry;
 	eval { $es->search(
 		index => IDXNAME,
 		type  => $type,
@@ -101,6 +104,7 @@ sub dbsearch {
 
 sub dbsearchterm {
 	my( $type, $term, $qry ) = @_;
+	return trace( WARN=>'db disabled' ) unless $es;
 	trace DEBUG=>'searching terms '.$type.' '.$qry;
 	eval { $es->search(
 		index => IDXNAME,
