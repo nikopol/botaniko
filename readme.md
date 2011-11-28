@@ -115,9 +115,9 @@ to add a command:
 
 	use botaniko::command;
 	command time=>{
-		help =>"display time",
+		help => 'display time',
 		root => 0,
-		bin=>sub{ [ scalar localtime ] }
+		bin  => sub{ [ scalar localtime ] }
 	};
 
 to async code:
