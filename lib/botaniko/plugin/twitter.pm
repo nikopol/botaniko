@@ -13,6 +13,8 @@ use botaniko::command;
 use botaniko::db;
 use botaniko::irc;
 
+my $DBTYPE = 'tweet';
+
 cfg_default 'plugins.twitter' => {
 	name                => 'your_bot_twitter_account_name',
 	consumer_key        => 'your_consumer_key',
@@ -53,7 +55,7 @@ sub get_twitter_timeline {
 			my $name = $tweet->{user}->{screen_name};
 			if( $name ne $me ) {
 				my $text = $tweet->{text};
-				dbindex tweet=>{
+				dbindex DBTYPE=>{
 					name    => $name,
 					text    => $text,
 					created => $tweet->{created_at}
