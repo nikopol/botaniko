@@ -28,6 +28,8 @@ GetOptions(
 	"log|loglevel|ll=s" => \$opt{'loglevel'},
 	"dbdebug"           => \$opt{'db.trace_calls'},
 	"dbinit"            => \$opt{'db.init'},
+	"reindex"           => \$opt{'db.reindex'},
+	"dboptimize"        => \$opt{'db.optimize'},
 	"dbtrace"           => \$opt{'db.trace_calls'},
 	"nodb"              => \$opt{'db.disabled'},
 	"tweetid|tid=i"     => \$opt{'plugins.twitter.lastid'},
@@ -51,6 +53,8 @@ options (none required, default values indicated):
   -mute                 setup mute mode
   -plugins=twitter,url  autoload these plugins
   -dbinit               erase and define elasticsearch botaniko's db
+  -dboptimize           optimize elasticsearch botaniko's db
+  -reindex              reindex elasticsearch botaniko's db
   -dbtrace              debug purpose
   -nodb                 start without db
   "-pass=pass phrase"   setup passphrase for root access

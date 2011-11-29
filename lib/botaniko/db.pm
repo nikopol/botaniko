@@ -19,8 +19,32 @@ my $es;
 sub dbinit {
 	return trace( ERROR=>'db elasticsearch is not configured' )
 		unless my $cfg = cfg 'db';
-	return 1 if delete $cfg->{disabled};
-	my $init = delete $cfg->{init};
+	return trace( ERROR=>'db elasticsearch disabled' )
+		if delete $cfg->{disabled};
+
+	my $MAPPINGS = {
+		url => { properties => {
+			date    => { type=>'date', format=>'yyyy-MM-dd HH:mm:ss' },
+			name    => { type=>'string', index=>'not_analyzed' },
+			url     => { type=>'string', index=>'not_analyzed' },
+			text    => { type=>'string' },
+			meta    => { type=>'string' },
+			title   => { type=>'string' },
+			chan    => { type=>'string', index=>'not_analyzed' },
+			from    => { type=>'string', index=>'not_analyzed' },
+		} },
+		tweet => { properties => {
+			date    => { type=>'date', format=>'yyyy-MM-dd HH:mm:ss' },
+			name    => { type=>'string', index=>'not_analyzed' },
+			text    => { type=>'string' },
+			meta    => { type=>'string' },
+			created => { type=>'string', index=>'not_analyzed' },
+		} },
+	};
+
+	my $init  = delete $cfg->{init};
+	my $reidx = delete $cfg->{reindex};
+	my $optim = delete $cfg->{optimize};
 	$es  = ElasticSearch->new( %$cfg );
 	my $esv = eval { $es->current_server_version };
 	return trace( ERROR=>'elasticsearch does not answer, it might be deaf' )
@@ -35,7 +59,7 @@ sub dbinit {
 		$es->create_index(
 			index    => IDXNAME,
 			settings => {
-				number_of_shards   => 1,
+				number_of_shards => 1,
 				analysis => {
 					analyzer => {
 						default => {
@@ -46,25 +70,29 @@ sub dbinit {
 					},
 				},
 			},
-			mappings => {
-				url => { properties => {
-					date    => { type=>'date', format=>'yyyy-MM-dd HH:mm:ss' },
-					name    => { type=>'string', index=>'not_analyzed' },
-					url     => { type=>'string', index=>'not_analyzed' },
-					text    => { type=>'string' },
-					meta    => { type=>'string' },
-					title   => { type=>'string' },
-					chan    => { type=>'string', index=>'not_analyzed' },
-					from    => { type=>'string', index=>'not_analyzed' },
-				} },
-				tweet => { properties => {
-					date    => { type=>'date', format=>'yyyy-MM-dd HH:mm:ss' },
-					name    => { type=>'string', index=>'not_analyzed' },
-					text    => { type=>'string' },
-					meta    => { type=>'string' },
-					created => { type=>'string', index=>'not_analyzed' },
-				} },
-			}
+			mappings => $MAPPINGS,
+		);
+	} elsif( $reidx ) {
+		for( keys %$MAPPINGS ) {
+			trace DEBUG=>'updating $_ mapping';
+			$es->put_mapping(
+				index    => IDXNAME,
+				type     => $_,
+				mapping  => { $_ => $MAPPINGS->{$_} }
+			);
+		}
+		trace DEBUG=>'reindexing';
+		my $scroll = $es->scrolled_search(
+			search_type => 'scan',
+			scroll      => '5m'
+		);
+		$es->reindex(source=>$scroll);
+	} elsif( $optim ) {
+		trace DEBUG=>'optimizing index';
+		$es->optimize_index(
+			index   => IDXNAME,
+			flush   => 1,
+			refresh => 1,
 		);
 	}
 	1
@@ -105,7 +133,7 @@ sub dbsearch {
 sub dbsearchterm {
 	my( $type, $term, $qry ) = @_;
 	return trace( WARN=>'db disabled' ) unless $es;
-	trace DEBUG=>'searching terms '.$type.' '.$qry;
+	trace DEBUG=>'searching terms '.(ref($type) eq 'ARRAY'?join(',',@$type):$type).' '.$qry;
 	eval { $es->search(
 		index => IDXNAME,
 		sort  => [ {'date'=>{order=>'asc'}} ],
