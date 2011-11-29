@@ -16,6 +16,8 @@ use botaniko::hook;
 use botaniko::command;
 use botaniko::irc;
 
+my $DBTYPE = 'url';
+
 chancfg_default 'plugins.url' => {
 	echo       => 0,
 	test_tweet => 0,
@@ -36,7 +38,7 @@ sub process_url {
 	my $title = '';
 	my $type  = '';
 	my $err   = '';
-	$url = $r->base->as_string if $r && $r->base;
+	$url = $r->request->uri->canonical->as_string if $r && $r->request;
 	if( $r->is_success ) {
 		trace DEBUG=>'resolved as '.$url.' ('.$r->headers->content_type.')';
 		$type = $r->headers->content_type;
@@ -61,8 +63,8 @@ sub process_url {
 		$err = $url.' returned '.$r->status_line;
 		trace WARN=>$err;
 	}
-	return if $url =~ m|^https?://twitter.com$|;
-	my $s = dbsearchterm 'url','url',$url;
+	#return if $url =~ m|^https?://twitter.com$|;
+	my $s = dbsearchterm $DBTYPE,'url',$url;
 	if( $s && $s->{hits}->{total} && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
 		my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
 		my $z = $parsedt->parse_datetime(strftime("%Y-%m-%d %H:%M:%S",localtime(time)))->epoch - $e;
@@ -78,7 +80,7 @@ sub process_url {
 			send_channel( $chan=>$out ) if $out;
 		}
 		trace INFO=>"add $url ($title)";
-		eval { dbindex url=>{
+		eval { dbindex $DBTYPE=>{
 			chan => $chan,
 			name => $nick,
 			from => $from,
