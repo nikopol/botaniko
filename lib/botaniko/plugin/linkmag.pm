@@ -15,16 +15,17 @@ cfg_default	'plugins.linkmag' => {
 	theme       => 'your_theme_url',
 	mustread    => 'your_mustread_url',
 	mustreaddoc => 'your_mustreaddoc_url',
+	default     => 'FR/actualites/societe/insolite',
 };
 
 command 
 	mustread => {
 		help => 'mustread [theme [count]]',
 		bin  => sub {
-			my $theme = shift || 'fr/actualites';
+			my $theme = shift || cfg 'plugins.linkmag.default';
 			my $count = shift || 3;
-			my $urlmustread    = cfg('plugins.linkmag.mustread');
-			my $urlmustreaddoc = cfg('plugins.linkmag.mustreaddoc');
+			my $urlmustread    = cfg 'plugins.linkmag.mustread';
+			my $urlmustreaddoc = cfg 'plugins.linkmag.mustreaddoc';
 			$count = 3 if $count < 0 || $count > 5;
 			trace DEBUG=>'loading '.$urlmustread;
 			my $req = HTTP::Request->new(POST => $urlmustread);
