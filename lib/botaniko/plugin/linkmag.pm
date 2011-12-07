@@ -23,13 +23,12 @@ command
 		help => 'mustread [theme=FR/actualites] [count=3]',
 		bin  => sub {
 			my( $qry, $theme, $count ) = getoptions( \@_, 
-				theme => cfg 'plugins.linkmag.default',
+				theme => cfg('plugins.linkmag.default'),
 				count => 3
 			);
 			my $urlmustread    = cfg 'plugins.linkmag.mustread';
 			my $urlmustreaddoc = cfg 'plugins.linkmag.mustreaddoc';
 			$count = 3 if $count =~ /\D/ || $count < 1 || $count > 5;
-			trace DEBUG=>'loading '.$urlmustread.' with theme='.$theme.' count='.$count;
 			my $req = HTTP::Request->new(POST => $urlmustread);
 			$req->header( 'Content-Type' => 'application/json' );
 			$req->content( encode_json({
@@ -46,10 +45,10 @@ command
 				$r = useragent->get( $urlmustreaddoc.$docid );
 				if( $r->is_success ) {
 					my $doc = decode_json $r->decoded_content;
-					push @$out, "- $doc->{title}";
-					push @$out, "  $doc->{original_url}"
+					push @$out, " - $doc->{title}";
+					push @$out, "   $doc->{original_url}"
 				} else {
-					push @$out, "- doc $docid returned $r->status_line"
+					push @$out, " - doc $docid returned $r->status_line"
 				}
 			}
 			$out or ['nothing']
