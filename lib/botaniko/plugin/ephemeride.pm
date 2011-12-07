@@ -16,11 +16,17 @@ cfg_default 'plugins.ephemeride' => {
 };
 
 command ephemeride => {
-	help => 'ephemeride',
+	help => 'ephemeride [yyyy-mm-dd]',
 	root => 0,
 	bin  => sub {
 		my($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
-		$year += 1900;
+		if( @_ && shift =~ /^(\d{4})[-/]?(\d{2})[-/]?(\d{2})$/ ) {
+			$year = $1;
+			$mon  = $2;
+			$mday = $3;
+		} else {
+			$year += 1900;
+		}
 		my $offset = tz_local_offset()/3600;
 		my($sunrise,$sunset) = sunrise(
 			$year,
@@ -30,7 +36,7 @@ command ephemeride => {
 			cfg('plugins.ephemeride.latitude'),
 			$offset
 		);
-		[ $year.'-'.$mon.'-'.$mday.' : '.$sunrise.' to '.$sunset ]
+		[ 'for the '.$year.'-'.$mon.'-'.$mday.', the sunrise is at '.$sunrise.' and the sunset at '.$sunset ]
 	}
 };
 
