@@ -20,10 +20,12 @@ cfg_default	'plugins.linkmag' => {
 
 command 
 	mustread => {
-		help => 'mustread [theme [count]]',
+		help => 'mustread [theme=FR/actualites] [count=3]',
 		bin  => sub {
-			my $theme = shift || cfg 'plugins.linkmag.default';
-			my $count = shift || 3;
+			my( $theme, $count ) = getoptions( \@_, 
+				theme => cfg 'plugins.linkmag.default',
+				count => 3
+			);
 			my $urlmustread    = cfg 'plugins.linkmag.mustread';
 			my $urlmustreaddoc = cfg 'plugins.linkmag.mustreaddoc';
 			$count = 3 if $count < 0 || $count > 5;
