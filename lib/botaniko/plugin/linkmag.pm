@@ -28,7 +28,8 @@ command
 			);
 			my $urlmustread    = cfg 'plugins.linkmag.mustread';
 			my $urlmustreaddoc = cfg 'plugins.linkmag.mustreaddoc';
-			$count = 3 if $count < 0 || $count > 5;
+			$count = 0+$count;
+			$count = 3 if $count < 1 || $count > 5;
 			trace DEBUG=>'loading '.$urlmustread;
 			my $req = HTTP::Request->new(POST => $urlmustread);
 			$req->header( 'Content-Type' => 'application/json' );
