@@ -63,7 +63,6 @@ sub process_url {
 		$err = $url.' returned '.$r->status_line;
 		trace WARN=>$err;
 	}
-	#return if $url =~ m|^https?://twitter.com$|;
 	my $s = dbsearchterm $DBTYPE,'url',$url;
 	if( $s && $s->{hits}->{total} && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
 		my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
@@ -89,7 +88,7 @@ sub process_url {
 			title=> $title,
 			meta => $url,
 		} };
-		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.tweet_url') && $text !~ /notweet/ ) {
+		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.tweet_url') && $text !~ /notweet/i ) {
 			$text =~ s/^[^\s\:]+\:\s+//;
 			fire TOTWEET=>$text,$nick,$chan;
 		}
