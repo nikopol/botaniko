@@ -115,6 +115,7 @@ sub dbindex {
 sub dbsearch {
 	my( $type, $qry, $from, $size ) = @_;
 	return trace( WARN=>'db disabled' ) unless $es;
+	eval { $es->refresh_index( index => IDXNAME ) };
 	trace DEBUG=>'searching '.($type?$type.' ':'').$qry;
 	eval { $es->search(
 		index => IDXNAME,
