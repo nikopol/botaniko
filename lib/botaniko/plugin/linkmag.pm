@@ -22,14 +22,13 @@ command
 	mustread => {
 		help => 'mustread [theme=FR/actualites] [count=3]',
 		bin  => sub {
-			my( $theme, $count ) = getoptions( \@_, 
+			my( $qry, $theme, $count ) = getoptions( \@_, 
 				theme => cfg 'plugins.linkmag.default',
 				count => 3
 			);
 			my $urlmustread    = cfg 'plugins.linkmag.mustread';
 			my $urlmustreaddoc = cfg 'plugins.linkmag.mustreaddoc';
-			$count = 0+$count;
-			$count = 3 if $count < 1 || $count > 5;
+			$count = 3 if $count =~ /\D/ || $count < 1 || $count > 5;
 			trace DEBUG=>'loading '.$urlmustread.' with theme='.$theme.' count='.$count;
 			my $req = HTTP::Request->new(POST => $urlmustread);
 			$req->header( 'Content-Type' => 'application/json' );
