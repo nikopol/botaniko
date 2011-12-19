@@ -25,7 +25,7 @@ use botaniko::tools;
 use base 'Exporter';
 our @EXPORT = qw(plant async unasync);
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 our $w;
 my %watch;
@@ -107,10 +107,20 @@ sub plant {
 				fire USERJOIN=>$nick,$chan;
 			}
 		},
+		part => sub {
+			my( $cnx, $nick, $chan, $myself, $msg ) = @_;
+			if( $myself ) {
+				trace NOTICE=>"leaved $chan";
+				set_chan_default $chan;
+				fire PART=>$chan;
+			} else {
+				trace INFO=>"$nick leaved (".($msg||'no msg').')';
+				fire USERPART=>$nick,$chan,$msg;
+			}
+		},
 		quit => sub {
 			my( $cnx, $nick, $msg ) = @_;
-			$msg ||= "no msg";
-			trace INFO=>"$nick quit ($msg)";
+			trace INFO=>"$nick quit (".($msg||'no msg').')';
 			fire USERQUIT=>$nick,$msg;
 		},
 		publicmsg => sub {

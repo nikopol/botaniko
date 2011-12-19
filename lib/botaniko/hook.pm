@@ -15,8 +15,10 @@ my %hooks;
 # DISCONNECT $cnx
 # MSG        $msg,$user,$from,$chan
 # JOIN       $chan
+# PART       $chan
 # QUIT       $chan
 # USERJOIN   $user,$chan
+# USERPART   $user,$chan,$msg
 # USERQUIT   $user,$msg
 # NICKCHANGE $old,$new
 # TWEET      $msg,$user
