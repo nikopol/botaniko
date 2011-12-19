@@ -52,6 +52,7 @@ $commands = {
 			join_channel $chan;
 			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
+			$auto = [ map { /^#/ ? $_ : '#'.$_ } @$auto ];
 			unless( $chan ~~ @$auto ) {
 				push @$auto, $chan;
 				cfg autojoin=>$auto;
@@ -71,7 +72,11 @@ $commands = {
 			leave_channel $chan;
 			my $auto = cfg 'autojoin';
 			$auto = [ $auto ] unless ref($auto) eq 'ARRAY';
-			$auto = [ grep { $_ ne $chan } @$auto ];
+			$auto = [
+				grep { $_ ne $chan }
+				map { /^#/ ? $_ : '#'.$_ } 
+				@$auto
+			];
 			cfg autojoin=>$auto;
 			['leaving '.$chan]
 		}
