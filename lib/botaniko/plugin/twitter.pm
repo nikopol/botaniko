@@ -12,6 +12,7 @@ use botaniko::hook;
 use botaniko::command;
 use botaniko::db;
 use botaniko::irc;
+use botaniko::tools;
 
 my $DBTYPE = 'tweet';
 
