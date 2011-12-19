@@ -3,7 +3,7 @@ botaniko
 
 is an IRC Bot "qui plante... ou pas"  
 (c) niko - under the [artistic license](http://www.perlfoundation.org/artistic_license_1_0)  
-alpha version.  
+beta version.  
 
 features
 --------
@@ -17,14 +17,14 @@ requires
 --------
 
 - elasticsearch
-- perl modules
+- perl modules (see Makefile.PL)
 
 quick start
 -----------
-make sure elasticsearch is started
+make sure elasticsearch is started (or add -nodb)
 
 	#show available options
-	bin/botaniko -help 
+	bin/botaniko -help
 
 	#first start
 	bin/botaniko -dbinit -c=mychannel -s=myircserver -n=mybotnick -pass=mypassphrase
@@ -38,7 +38,7 @@ core commands
 basics:
 
 	- help [command]
-	- mute                : turn off all outputs'
+	- mute                : turn off all outputs
 	- uptime
 	- version
 	- search query [from=0] [count=5] [type=tweet|url|...] : search from db
@@ -48,11 +48,11 @@ admins: (requires admin access, granted by /msg mybot passphrase)
 
 	- join #mychan        : join channels
 	- leave #mychan       : leave channels
-	- load plugin         : try to load one or more plugins
+	- load plugin         : try to load a plugin
 	- plugins             : list loaded plugins
 	- quit
-	- set variable [[=] value] : get or set a configuration variable
-	- unload plugin [plugin [...]] : unload one or more plugin
+	- set key [[=] value] : get or set a configuration variable
+	- unload plugin       : unload a plugin
 
 plugin twitter commands
 -----------------------
@@ -61,6 +61,16 @@ plugin twitter commands
 	- follower [regex]              : list followers
 	- following [regex]             : list following
 	- unfollow tweetos
+
+plugin wikipedia command
+-----------------------
+
+	- wikipedia subject
+
+plugin ephemeride command
+-----------------------
+
+	- ephemeride [yyyy-mm-dd]
 
 writing a plugin
 ----------------
@@ -82,13 +92,13 @@ to setup a default conf :
 	};
 	#per channel config
 	chancfg_default 'plugins.quiz' => {
-		playable => 1
+		enabled => 1
 	};
 
 to read conf :
 
-	if( chancfg($chan,'plugins.quiz.playable') ) {
-		send_channel $chan=>'quiz v'.cfg 'plugins.quiz.version'
+	if( chancfg($chan,'plugins.quiz.enabled') ) {
+		send_channel $chan=>'quiz v'.cfg('plugins.quiz.version')
 	}
 
 to hook an event:
@@ -97,9 +107,11 @@ available event are (with given parameters):
 - CONNECT    $cnx  
 - DISCONNECT $cnx  
 - MSG        $msg,$user,$from,$chan  
-- JOIN       $chan  
+- JOIN       $chan
+- PART       $chan    
 - QUIT       $chan  
 - USERJOIN   $user,$chan  
+- USERPART   $user,$chan,$msg  
 - USERQUIT   $user,$msg  
 - NICKCHANGE $old,$new  
 - TWEET      $msg,$user  
