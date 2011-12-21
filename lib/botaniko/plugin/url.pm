@@ -38,6 +38,7 @@ sub process_url {
 	my $title = '';
 	my $type  = '';
 	my $err   = '';
+	my $tagol = $text =~ /\#oldlink/i;
 	$url = $r->request->uri->canonical->as_string if $r && $r->request;
 	if( $r->is_success ) {
 		trace DEBUG=>'resolved as '.$url.' ('.$r->headers->content_type.')';
@@ -65,18 +66,25 @@ sub process_url {
 	}
 	my $s = dbsearchterm $DBTYPE,'url',$url;
 	if( $s && $s->{hits}->{total} && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
-		my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
-		my $z = $parsedt->parse_datetime(strftime("%Y-%m-%d %H:%M:%S",localtime(time)))->epoch - $e;
-		send_channel( $chan=>$nick.': old link !p since '.delay($z).' '.record(oldlink=>$z,$nick) );
-		send_channel( $chan=>$_->{_source}->{date}.' @'.$_->{_source}->{name}.': '.$_->{_source}->{text} )
-			for @{$s->{hits}->{hits}};
+		unless( $tagol ) {
+			my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
+			my $z = $parsedt->parse_datetime(strftime("%Y-%m-%d %H:%M:%S",localtime(time)))->epoch - $e;
+			send_channel( $chan=>$nick.': old link !p since '.delay($z).' '.record(oldlink=>$z,$nick) );
+			send_channel( $chan=>$_->{_source}->{date}.' @'.$_->{_source}->{name}.': '.$_->{_source}->{text} )
+				for @{$s->{hits}->{hits}};
+		}
 	} else {
-		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.echo') ) {
-			my $out;
-			$out = $url.' => type: '.$type if $type;
-			$out = $url.' => "'.$title.'"' if $title;
-			$out = $err if $err;
-			send_channel( $chan=>$out ) if $out;
+		if( $chan ne 'twitter' ) {
+			if( chancfg($chan,'plugins.url.echo') ) {
+				my $out;
+				$out = $url.' => type: '.$type if $type;
+				$out = $url.' => "'.$title.'"' if $title;
+				$out = $err if $err;
+				send_channel( $chan=>$out ) if $out;
+			}
+			if( $tagol ) {
+				send_channel $chan=>$nick.': this is not an old link for me';
+			}
 		}
 		trace INFO=>"add $url ($title)";
 		eval { dbindex $DBTYPE=>{
