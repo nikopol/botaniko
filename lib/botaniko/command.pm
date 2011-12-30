@@ -13,7 +13,7 @@ use botaniko::irc;
 use botaniko::db;
 
 use base 'Exporter';
-our @EXPORT = qw(run command);
+our @EXPORT = qw(run command commander);
 
 my $startime = time;
 
@@ -244,17 +244,23 @@ sub uncommand {
 	}
 }
 
+my( $cmdnick, $cmdfrom );
+sub commander {
+	wantarray ? ( $cmdnick, $cmdfrom ) : $cmdnick
+}
+
 sub run {
-	my( $nick, $from, $what ) = @_;
+	my $what;
+	( $cmdnick, $cmdfrom, $what ) = @_;
 	$what =~ s/^\s+|\s+$//g;
 	my @out;
 	if( $what ) {
-		trace INFO=>"$nick want $what";
+		trace INFO=>"$cmdnick want $what";
 		my @args = split /\s/,$what;
 		my $c = shift @args;
 		if( $c && exists $commands->{$c} ) {
 			if( my $bin = $commands->{$c}->{bin} ) {
-				if( $commands->{$c}->{root} && !admin($from) ) {
+				if( $commands->{$c}->{root} && !admin($cmdfrom) ) {
 					push @out,pickone(
 						'you are not my master',
 						'who do you think you are to ask me that ?',
@@ -262,11 +268,11 @@ sub run {
 						'if you say so',
 					)
 				} elsif( $c eq 'help' ) {
-					@out    = @{ &$bin(admin($from),@args) };
+					@out    = @{ &$bin(admin($cmdfrom),@args) };
 				} else {
 					my $hlp = $commands->{help}->{bin};
 					my $r   = &$bin(@args);
-					@out    = $r ? @$r : ( &$hlp(admin($from),$c) );
+					@out    = $r ? @$r : ( &$hlp(admin($cmdfrom),$c) );
 				}
 			} else {
 				trace ERROR=>"no bin provided for command $c";
@@ -286,3 +292,4 @@ sub run {
 	@out
 }
 
+1
