@@ -20,6 +20,7 @@ requires( 'HTML::Entities' );
 requires( 'URI::Escape' );
 requires( 'JSON::XS' );
 requires( 'DateTime::Format::Strptime' );
+requires( 'GD' );
 
 #tests 't/*.t';
 #author_tests 'xt';
