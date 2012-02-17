@@ -117,4 +117,11 @@ hook TWEET => sub {
 	}
 };
 
+hook RSS => sub {
+	my($msg,$user) = @_;
+	if( my @urls = ($msg =~ m{(https?://[\S]+)}gi) ) {
+		process_url( 'twitter', $user, '', $_, $msg ) for @urls
+	}
+};
+
 1

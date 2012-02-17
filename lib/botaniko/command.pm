@@ -170,7 +170,7 @@ $commands = {
 			my %set;
 			my $len = 0;
 			for( @$r ) {
-				$v = $_ =~ /passphrase|secret/ ? ('*' x length($cfg->{$_})) : cfg($_);
+				$v = $_ =~ /passphrase|secret|password/ ? ('*' x length($cfg->{$_})) : cfg($_);
 				$v .= ' ('.delay(cfg($_)).')' if /^records\..+\.score$/;
 				$set{$_} = $v;
 				$len = length($_) if length($_) > $len;
