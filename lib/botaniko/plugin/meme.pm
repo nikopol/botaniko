@@ -28,13 +28,14 @@ cfg_default	'plugins.meme' => {
 
 command
 	meme => {
-		help => "meme img=url text top | text bottom [size=small|medium|large|huge] [#notweet]",
+		help => "meme img=url text top | text bottom [size=small|medium|large|huge] [fontsize=30] [#notweet]",
 		bin  => sub {
-			my( $qry, $imgurl, $size, $font, $tweet ) = getoptions( \@_,
+			my( $qry, $imgurl, $size, $font, $tweet, $fs ) = getoptions( \@_,
 				img   => undef,
 				size  => cfg('plugins.meme.size'),
 				font  => cfg('plugins.meme.font'),
 				tweet => cfg('plugins.meme.tweet'),
+				fontsize => undef,
 			);
 			return ['you forgot img=url'] unless $imgurl;
 			return ['unknown size'] unless exists $SIZES{$size};
@@ -56,16 +57,17 @@ command
 			return [ 'image url returned '.$r->message().' ('.$r->code().')' ]
 				unless $r->is_success;
 			my $type = $r->headers->content_type;
-			return [ 'unsupported type ($type)' ]
-				unless $type =~ m/image/ && $type =~ /jpe?g|png/;
-			my $src = GD::Image->new($r->decoded_content());
-			return [ 'invalid image' ] 
+			return [ "unsupported type ($type)" ]
+				unless $type =~ m/image/;
+			my $src = eval{ GD::Image->new($r->decoded_content()) };
+			return [ "invalid image ($type)" ] 
 				unless $src;
 			
 			my( $srcw, $srch ) = ( $src->width(), $src->height() );
 			trace DEBUG=>"image $srcw x $srch loaded";
 
 			my( $w, $h, $m, $fontsize, $b ) = @{$SIZES{$size}};
+			$fontsize = $fs if $fs;
 			( $w, $h ) = ( $h, $w ) if $srch > $srcw;
 			my( $mt, $mb, $ml, $mr ) = ( $m ) x 4;
 
