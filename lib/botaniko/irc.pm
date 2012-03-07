@@ -21,9 +21,9 @@ sub irc {
 sub channels {
 	my $chan = shift;
 	map { /^#/ ? $_ : "#$_" }
-		!$chan                ? keys irc->channel_list :
+		!$chan                ? keys %{irc->channel_list} :
 		ref($chan) eq 'ARRAY' ? @$chan :
-		$chan eq 'all'        ? keys irc->channel_list :
+		$chan eq 'all'        ? keys %{irc->channel_list} :
 		                        ( $chan )
 }
 

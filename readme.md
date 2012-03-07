@@ -1,5 +1,5 @@
-botaniko
-========
+botaniko 0.7
+============
 
 is an IRC Bot "qui plante... ou pas"  
 (c) niko - under the [artistic license](http://www.perlfoundation.org/artistic_license_1_0)  

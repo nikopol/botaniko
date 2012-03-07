@@ -48,7 +48,8 @@ options (none required, default values indicated):
   -cfg=./botaniko.yml   config file
   -s=irc.freenode.net   irc server hostname
   -p=6667               irc server port
-  -c=botaniko           channels to join separated with ,
+  -n=hal2000            bot nickname
+  -c=chan1,chan2        channels to join separated with ,
   -ll=info              log level (error>warning>notice>info>debug)
   -mute                 setup mute mode
   -plugins=twitter,url  autoload these plugins
