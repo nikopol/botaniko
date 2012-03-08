@@ -56,7 +56,7 @@ sub get_twitter_timeline {
 			my $name = $tweet->{user}->{screen_name};
 			if( $name ne $me ) {
 				my $text = $tweet->{text};
-				dbindex DBTYPE=>{
+				dbindex $DBTYPE=>{
 					name    => $name,
 					text    => $text,
 					created => $tweet->{created_at}
