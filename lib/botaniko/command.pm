@@ -128,7 +128,7 @@ $commands = {
 	search => {
 		help => 'search query [from=0] [count=5] [type=tweet,url,...] : search from db',
 		bin  => sub {
-			my( $qry, $from, $size, $type ) = getoptions(\@_,from=>0,count=>5,type=>'tweet,url');
+			my( $qry, $from, $size, $type ) = getoptions(\@_,from=>0,count=>5,type=>'url');
 			$qry = join(' ',@$qry);
 			return [ 'what are you searching for ?' ] unless $qry;
 			my $out = [];
