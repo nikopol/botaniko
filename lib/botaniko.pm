@@ -25,7 +25,7 @@ use botaniko::tools;
 use base 'Exporter';
 our @EXPORT = qw(plant async unasync);
 
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 
 our $w;
 my %watch;
