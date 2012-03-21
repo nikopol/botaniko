@@ -65,7 +65,8 @@ sub process_url {
 		trace WARN=>$err;
 	}
 	my $s = dbsearchterm $DBTYPE,'url',$url;
-	if( $s && $s->{hits}->{total} && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
+	my $nbhit = $s && $s->{hits}->{total} ? 0+$s->{hits}->{total} : 0;
+	if( $nbhit && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
 		unless( $tagol ) {
 			my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
 			my $z = $parsedt->parse_datetime(strftime("%Y-%m-%d %H:%M:%S",localtime(time)))->epoch - $e;
@@ -120,7 +121,7 @@ hook TWEET => sub {
 hook RSS => sub {
 	my($msg,$user) = @_;
 	if( my @urls = ($msg =~ m{(https?://[\S]+)}gi) ) {
-		process_url( 'twitter', $user, '', $_, $msg ) for @urls
+		process_url( 'rss', $user, '', $_, $msg ) for @urls
 	}
 };
 
