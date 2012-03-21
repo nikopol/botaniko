@@ -126,9 +126,9 @@ $commands = {
 		}
 	},
 	search => {
-		help => 'search query [from=0] [count=5] [type=tweet,url,...] : search from db',
+		help => 'search query [from=0] [count=5] [type=tweet,url] : search from db',
 		bin  => sub {
-			my( $qry, $from, $size, $type ) = getoptions(\@_,from=>0,count=>5,type=>'url');
+			my( $qry, $from, $size, $type ) = getoptions(\@_,from=>0,count=>10,type=>'url');
 			$qry = join(' ',@$qry);
 			return [ 'what are you searching for ?' ] unless $qry;
 			my $out = [];
@@ -141,7 +141,7 @@ $commands = {
 					for @{$r->{hits}->{hits}};
 				push @$out, '... '.$r->{hits}->{total}.' matches';
 			} else {
-				push @$out, 'no match';
+				push @$out, 'no match with type '.$type;
 			}
 			$out
 		}
