@@ -30,7 +30,11 @@ chancfg_default 'plugins.twitter' => {
 	echo                => 1,
 };
 
-my $twitter = Net::Twitter->new( traits=>['API::REST', 'OAuth'], %{cfg('plugins.twitter')} );
+my $twitter = Net::Twitter->new( 
+	traits         => ['API::REST', 'OAuth'],
+	useragent_args => cfg('lwp') || { agent => 'Bot4Niko/'.$botaniko::VERSION, timeout => 10 },
+	%{cfg('plugins.twitter')}
+);
 $twitter->access_token(cfg 'plugins.twitter.access_token');
 $twitter->access_token_secret(cfg 'plugins.twitter.access_token_secret');
 unless( cfg 'plugins.twitter.lastid' ) {
