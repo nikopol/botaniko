@@ -59,7 +59,7 @@ sub check_rss {
 							if chancfg($chan,'plugins.rss.echo');
 					}
 					fire RSS => $what,$who;
-					$maxdate = $item->pubDate() if ($maxdate cmp $item->pubDate()) == -1;
+					$maxdate = $item->pubDate() if !$maxdate || ($maxdate cmp $item->pubDate()) == -1;
 				}
 			}
 			$flux->{$name}{lastdate} = $maxdate if $maxdate;
