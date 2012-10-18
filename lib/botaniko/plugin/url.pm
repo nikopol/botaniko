@@ -19,10 +19,11 @@ use botaniko::irc;
 my $DBTYPE = 'url';
 
 chancfg_default 'plugins.url' => {
-	echo       => 0,
-	test_tweet => 0,
-	test_url   => 1,
-	tweet_url  => 1,
+	echo        => 0,
+	test_tweet  => 0,
+	test_url    => 1,
+	tweet_url   => 1,
+	store_image => '',
 };
 
 sub process_url {
@@ -58,6 +59,27 @@ sub process_url {
 				my( $width, $height ) = dim( $inf );
 				$title = "Image $width x $height";
 				$title .= ' : '.$inf->{Comment} if $inf->{Comment};
+				if( my $fn = chancfg($chan,'plugins.url.store_image') ) {
+					$fn .= '/' unless $fn =~ m|/$|;
+					$fn .= $chan;
+					unless( -d $fn ) {
+						eval { mkdir $fn } or trace ERROR=>"unable to mkdir $fn : $@";
+					}
+					if( -d $fn ) {
+						my $t = $text;
+						$t =~ s/http:[^\s]+//gi;
+						$t =~ s/(^\s+|\s+$)//g;
+						$t = ": $t" if $t;
+						$fn .= strftime("%Y%m%d %H%M%S",localtime(time))." $nick$t";
+						if( open( FH, '>', $fn ) ) {
+							print FH $r->decoded_content();
+							close FH;
+							trace DEBUG=>"image stored in $fn";
+						} else {
+							trace ERROR=>"unable to create $fn";
+						}
+					}
+				}
 			}
 		}
 	} else {
