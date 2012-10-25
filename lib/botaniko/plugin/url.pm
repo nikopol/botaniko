@@ -60,8 +60,10 @@ sub process_url {
 				$title = "Image $width x $height";
 				$title .= ' : '.$inf->{Comment} if $inf->{Comment};
 				if( my $fn = chancfg($chan,'plugins.url.store_image') ) {
+					my $c = $chan;
+					$c =~ s/^\#//;
 					$fn .= '/' unless $fn =~ m|/$|;
-					$fn .= $chan;
+					$fn .= $c;
 					unless( -d $fn ) {
 						eval { mkdir $fn } or trace ERROR=>"unable to mkdir $fn : $@";
 					}
@@ -70,7 +72,10 @@ sub process_url {
 						$t =~ s/http:[^\s]+//gi;
 						$t =~ s/(^\s+|\s+$)//g;
 						$t = ": $t" if $t;
-						$fn .= strftime("%Y%m%d %H%M%S",localtime(time))." $nick$t";
+						$fn .= '/'.strftime("%Y%m%d %H%M%S",localtime(time))." $nick$t";
+						$fn .= $url =~ /\.png$/i || $type =~ /png/i ? '.png'
+                             : $url =~ /\.gif$/i || $type =~ /gif/i ? '.gif'
+                             : '.jpg';
 						if( open( FH, '>', $fn ) ) {
 							print FH $r->decoded_content();
 							close FH;
