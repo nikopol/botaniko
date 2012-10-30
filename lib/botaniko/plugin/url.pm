@@ -62,17 +62,19 @@ sub process_url {
 				if( my $fn = chancfg($chan,'plugins.url.store_image') ) {
 					my $c = $chan;
 					$c =~ s/^\#//;
-					$fn .= '/' unless $fn =~ m|/$|;
-					$fn .= $c;
-					unless( -d $fn ) {
-						eval { mkdir $fn } or trace ERROR=>"unable to mkdir $fn : $@";
+					my @lt = localtime(time);
+					my @subdirs = ( $c, strftime('%Y',@lt), strftime('%m',@lt) );
+					for my $sd ( @subdirs ) {
+						$fn .= '/' unless $fn =~ m|/$|;
+						$fn .= $sd;
+						unless( -d $fn ) { eval { mkdir $fn } or trace ERROR=>"unable to mkdir $fn : $@"; }
 					}
 					if( -d $fn ) {
 						my $t = $text;
-						$t =~ s/http:[^\s]+//gi;
+						$t =~ s/https?:[^\s]+//gi;
 						$t =~ s/(^\s+|\s+$)//g;
 						$t = ": $t" if $t;
-						$fn .= '/'.strftime("%Y%m%d %H%M%S",localtime(time))." $nick$t";
+						$fn .= '/'.strftime("%Y%m%d %H%M%S",@lt)." $nick$t";
 						$fn .= $url =~ /\.png$/i || $type =~ /png/i ? '.png'
                              : $url =~ /\.gif$/i || $type =~ /gif/i ? '.gif'
                              : '.jpg';
