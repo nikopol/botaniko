@@ -81,7 +81,7 @@ command
 		help => 'rss list|read name [count=5]|add/update name url [user=u password=s]|rm name',
 		root => 1,
 		bin  => sub {
-			my $cmd = shift or return;
+			my $cmd = shift || 'list';
 			my( $opts, $count, $login, $pwd ) = getoptions(\@_,count=>5,login=>'',password=>'');
 			my $flux = cfg('plugins.rss.flux') || {};
 			my $name = @$opts ? shift @$opts : undef;
@@ -97,8 +97,9 @@ command
 					$count
 				)
 			}elsif( $cmd =~ /li?st/i ){
-				return ['none'] unless @$flux;
-				[ map { $_.' '.$_->{url} } keys %$flux ]
+				return keys %$flux
+					? [ map { $_.' '.$flux->{$_}{url} } keys %$flux ]
+					: ['none'];
 			}elsif( $cmd =~ /add|update/i ){
 				return ['name?'] unless $name;
 				my $url = shift @$opts;
@@ -108,8 +109,8 @@ command
 					url      => $url,
 					lastdate => strftime("%Y-%m-%dT%T",localtime(time))
 				};
-				$flux->{$name}->{login}    = $login if $login;
-				$flux->{$name}->{password} = $pwd if $pwd;
+				$flux->{$name}{login}    = $login if $login;
+				$flux->{$name}{password} = $pwd if $pwd;
 				cfg 'plugins.rss.flux' => $flux;
 				[ $upd ? 'rss updated' : 'rss added' ]
 			}elsif( $cmd =~ /re?m|del/i ){
