@@ -125,6 +125,21 @@ $commands = {
 			)]
 		}
 	},
+	reload => {
+		help => 'reload plugin [plugin [...]] : reload one or more plugin',
+		root => 1,
+		bin  => sub {
+			my $out = [];
+			for my $p ( @_ ) {
+				if( unplugin( $p ) && plugin( $p ) ) {
+					push @$out, "$p reloaded";
+				} else {
+					push @$out, $@;
+				}
+			}
+			$out
+		}
+	},
 	search => {
 		help => 'search query [from=0] [count=5] [type=tweet,url] : search from db',
 		bin  => sub {
