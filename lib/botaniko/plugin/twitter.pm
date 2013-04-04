@@ -31,7 +31,7 @@ chancfg_default 'plugins.twitter' => {
 };
 
 my $twitter = Net::Twitter->new( 
-	traits         => ['API::REST', 'OAuth'],
+	traits         => ['API::RESTv1_1'],
 	useragent_args => cfg('lwp') || { agent => 'Bot4Niko/'.$botaniko::VERSION, timeout => 10 },
 	%{cfg('plugins.twitter')}
 );
@@ -49,7 +49,7 @@ trace DEBUG=>"last tweet id set to ".cfg 'plugins.twitter.lastid';
 
 sub get_twitter_timeline {
 	return unless $twitter;
-	#trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.lastid');
+	trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.lastid');
 	my $timeline = eval { $twitter->home_timeline({ count=>10, since_id=>cfg('plugins.twitter.lastid') }) };
 	if( my $err = $@ ) {
 		trace ERROR=>'twitter '.$err->error;
@@ -121,7 +121,8 @@ command
 			$r = [
 				sort
 				grep { $_ =~ $regex } 
-				map  { $_->{screen_name}.($_->{name}?' ('.$_->{name}.')':'') } @$r 
+				map  { $_->{screen_name}.($_->{name}?' ('.$_->{name}.')':'') }
+				@{$r->{users}} 
 			];
 			my $count = @$r;
 			my $out = [];
@@ -142,7 +143,8 @@ command
 			$r = [
 				sort
 				grep { $_ =~ $regex } 
-				map  { $_->{screen_name}.($_->{name}?' ('.$_->{name}.')':'') } @$r 
+				map  { $_->{screen_name}.($_->{name}?' ('.$_->{name}.')':'') } 
+				@{$r->{users}} 
 			];
 			my $count = @$r;
 			my $out = [];

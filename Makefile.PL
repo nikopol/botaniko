@@ -14,7 +14,7 @@ requires( 'LWP::UserAgent' );
 requires( 'Getopt::Long' );
 
 #plugins
-requires( 'Net::Twitter' );
+requires( 'Net::Twitter' => '4.00004' );
 requires( 'HTTP::Request' );
 requires( 'HTML::Entities' );
 requires( 'URI::Escape' );
