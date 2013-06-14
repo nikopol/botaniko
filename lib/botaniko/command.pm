@@ -3,6 +3,9 @@ package botaniko::command;
 use strict;
 use warnings;
 use 5.010;
+
+no if $] >= 5.018, 'warnings', "experimental::smartmatch";
+
 use Digest::SHA1 'sha1_hex';
 
 use botaniko::logger;

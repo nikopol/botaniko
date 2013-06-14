@@ -5,6 +5,8 @@ use warnings;
 use 5.010;
 use Class::Unload;
 
+no if $] >= 5.018, 'warnings', "experimental::smartmatch";
+
 use botaniko::logger;
 use botaniko::tools;
 use botaniko::config;
