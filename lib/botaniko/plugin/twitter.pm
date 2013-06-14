@@ -33,6 +33,7 @@ chancfg_default 'plugins.twitter' => {
 my $twitter = Net::Twitter->new( 
 	traits         => ['API::RESTv1_1'],
 	useragent_args => cfg('lwp') || { agent => 'Bot4Niko/'.$botaniko::VERSION, timeout => 10 },
+	decode_html_entities => 1,
 	%{cfg('plugins.twitter')}
 );
 $twitter->access_token(cfg 'plugins.twitter.access_token');
