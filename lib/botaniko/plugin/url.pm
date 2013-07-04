@@ -24,6 +24,7 @@ chancfg_default 'plugins.url' => {
 	test_url    => 1,
 	tweet_url   => 1,
 	store_image => '',
+	chmod       => '0666',
 };
 
 sub process_url {
@@ -60,6 +61,7 @@ sub process_url {
 				$title = "Image $width x $height";
 				$title .= ' : '.$inf->{Comment} if $inf->{Comment};
 				if( my $fn = chancfg($chan,'plugins.url.store_image') ) {
+					my $perm= oct(chancfg($chan,'plugins.url.chmod'));
 					my $c = $chan;
 					$c =~ s/^\#//;
 					my @lt = localtime(time);
@@ -67,7 +69,10 @@ sub process_url {
 					for my $sd ( @subdirs ) {
 						$fn .= '/' unless $fn =~ m|/$|;
 						$fn .= $sd;
-						unless( -d $fn ) { eval { mkdir $fn } or trace ERROR=>"unable to mkdir $fn : $@"; }
+						unless( -d $fn ) { eval { 
+							mkdir($fn);
+							chmod $perl+oct('0111'), $fn;
+						} or trace ERROR=>"unable to mkdir $fn : $@"; }
 					}
 					if( -d $fn ) {
 						my $t = $text;
@@ -81,6 +86,7 @@ sub process_url {
 						if( open( FH, '>', $fn ) ) {
 							print FH $r->decoded_content();
 							close FH;
+							chmod $perm => $fn;
 							trace DEBUG=>"image stored in $fn";
 						} else {
 							trace ERROR=>"unable to create $fn";

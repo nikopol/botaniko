@@ -19,11 +19,12 @@ my %SIZES = ( #width,height,margin,fontsize,border
 );
 
 cfg_default	'plugins.meme' => {
-	size    => 'medium',
-	font    => '/fonts/font.ttf',
-	savedir => '/webserver/path/',
-	geturl  => 'http://host/path/',
-	tweet   => 1,
+	size     => 'medium',
+	font     => '/fonts/font.ttf',
+	savedir  => '/webserver/path/',
+	chmod    => '0666',
+	geturl   => 'http://host/path/',
+	tweet    => 1,
 };
 
 command
@@ -108,6 +109,7 @@ command
 			binmode $fh;
 			print $fh $img->jpeg;
 			close $fh;
+			chmod oct(cfg('plugins.meme.chmod')), $path;
 			
 			my $url = cfg('plugins.meme.geturl').$out;
 			if( $tweet ) {
