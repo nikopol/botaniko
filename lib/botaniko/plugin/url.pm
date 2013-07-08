@@ -71,7 +71,7 @@ sub process_url {
 						$fn .= $sd;
 						unless( -d $fn ) { eval { 
 							mkdir($fn);
-							chmod $perl+oct('0111'), $fn;
+							chmod $perm+oct('0111'), $fn;
 						} or trace ERROR=>"unable to mkdir $fn : $@"; }
 					}
 					if( -d $fn ) {
