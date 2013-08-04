@@ -72,6 +72,10 @@ sub trunc {
 		splice( @$out, 0, $max ),
 		"...truncated from $count lines"
 	] if $count > $max;
+	$out = [
+		map { length($_) > 128 ? substr($_,0,125).'...' : $_ }
+		@$out
+	];
 	$out
 }
 
