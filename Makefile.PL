@@ -30,6 +30,6 @@ install_script 'bin/botaniko';
 #build_requires 'Test::More';
 build_requires 'Module::Install';
 
-use_test_base;
+#use_test_base;
 auto_include;
 WriteAll;
