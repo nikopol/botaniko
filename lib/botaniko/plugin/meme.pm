@@ -29,7 +29,7 @@ cfg_default	'plugins.meme' => {
 
 command
 	meme => {
-		help => "meme img=url text top | text bottom [size=small|medium|large|huge] [fontsize=30] [#notweet]",
+		help => "meme img=url text top | text bottom [size=small|medium|large|huge] [fontsize=30|20] [#notweet]",
 		bin  => sub {
 			my( $qry, $imgurl, $size, $font, $tweet, $fs ) = getoptions( \@_,
 				img   => undef,
@@ -68,7 +68,17 @@ command
 			trace DEBUG=>"image $srcw x $srch loaded";
 
 			my( $w, $h, $m, $fontsize, $b ) = @{$SIZES{$size}};
-			$fontsize = $fs if $fs;
+			my( $fstop, $fsbot ) = ( $fontsize, $fontsize );
+			if( $fs ) {
+				if( $fs =~ /^(\d+)\|(\d+)$/ ) {
+					$fstop = $1;
+					$fsbot = $2;
+				} elsif( $fs =~ /^\d+$/ ) {
+					$fstop = 
+					$fsbot = $fs;
+				}
+			}
+			
 			( $w, $h ) = ( $h, $w ) if $srch > $srcw;
 			my( $mt, $mb, $ml, $mr ) = ( $m ) x 4;
 
@@ -78,22 +88,22 @@ command
 			$img->filledRectangle(0,0,$w-1,$h-1,$black);
 
 			if( $tt ) {
-				my @bounds = GD::Image->stringFT(0,$font,$fontsize,0,0,0,$tt);
+				my @bounds = GD::Image->stringFT(0,$font,$fstop,0,0,0,$tt);
 				my $tw = $bounds[2]-$bounds[0];
 				my $th = $bounds[1]-$bounds[5];
 				my $tx = ($w/2)-($tw/2);
 				my $ty = (($m+$th)/2)+($th/2);
-				$img->stringFT($white,$font,$fontsize,0,$tx,$ty,$tt);
+				$img->stringFT($white,$font,$fstop,0,$tx,$ty,$tt);
 				$mt = $th+$m;
 			}
 
 			if( $bt ) {
-				my @bounds = GD::Image->stringFT(0,$font,$fontsize,0,0,0,$bt);
+				my @bounds = GD::Image->stringFT(0,$font,$fsbot,0,0,0,$bt);
 				my $tw = $bounds[2]-$bounds[0];
 				my $th = $bounds[1]-$bounds[5];
 				my $tx = ($w/2)-($tw/2);
 				my $ty = $h - (($m+$th)/2)+($th/2);
-				$img->stringFT($white,$font,$fontsize,0,$tx,$ty,$bt);
+				$img->stringFT($white,$font,$fsbot,0,$tx,$ty,$bt);
 				$mb = $th+$m;
 			}
 
