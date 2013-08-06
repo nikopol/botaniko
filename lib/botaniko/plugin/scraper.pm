@@ -23,7 +23,7 @@ sub scrap {
 		trace(ERROR=>'error loading '.$cfg->{url}.' : '.$r->status_line),
 		return ['error loading '.$cfg->{url}.' : '.$r->status_line];
 	}
-	my $prefix = cfg 'plugins.scraper.prefix';
+	my $prefix = cfg 'plugins.scraper.prefix' || '';
 	my $page = $r->decoded_content;
 	my $rule = $cfg->{rule};
 	my @scraps;
