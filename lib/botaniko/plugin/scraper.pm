@@ -11,6 +11,7 @@ use botaniko::tools;
 
 cfg_default 'plugins.scraper' => {
 	scraps   => {},
+	prefix   => '=> ',
 };
 
 sub scrap {
@@ -22,10 +23,11 @@ sub scrap {
 		trace(ERROR=>'error loading '.$cfg->{url}.' : '.$r->status_line),
 		return ['error loading '.$cfg->{url}.' : '.$r->status_line];
 	}
+	my $prefix = cfg 'plugins.scraper.prefix';
 	my $page = $r->decoded_content;
 	my $rule = $cfg->{rule};
 	my @scraps;
-	push @scraps, $1 while $page =~ /$rule/mg;
+	push @scraps, "$prefix$1" while $page =~ /$rule/mg;
 	@scraps ? \@scraps : ['no match'];
 }
 
