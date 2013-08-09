@@ -67,22 +67,35 @@ to restart your bot for the changes to take effect. You may prefer to use the
 
 ## Plugins
 
+
 ### Ephemeride
 
 Load the plugin with `load ephemeride`. You can now get some info on the current
 day like in an [almanac](https://en.wikipedia.org/wiki/Almanac), or optionally
-for a date given as an argument:
+for a date given as an argument.
 
-    ephemeride [yyy-mm-dd]
+#### Configuration
 
-By default, the plugin will use the latitude and longitude of Paris, France. You
-can change this with the variables `plugins.ephemeride.latitude` and
-`plugins.ephemeride.longitude`.
+By default, the plugin will use the latitude and longitude of Paris, France. You change this:
+
+	set plugins.ephemeride.latitude = 48.86
+	set plugins.ephemeride.longitude = 2.33
+
+#### Commands
+
+	`ephemeride [yyy-mm-dd]`
+
 
 ### Scraper
 
 Load the plugin with `load scraper`. It allows you and others to capture some
 text from a Web page with a regex.
+
+#### Configuration
+
+By default, the bot will prefix all matches with `=> `. You can change this with:
+
+	set plugins.scraper.prefix = *
 
 #### Commands
 
@@ -96,12 +109,12 @@ text from a Web page with a regex.
 - `scrap name`. Execute a scrap (e.g. `scrap wk`).  The bot will
   print all matches (there’s only one in the example above).
 
-By default, the bot will prefix all matches with `=> `. You can change this with
-the variable `plugins.scraper.prefix`.
 
 ### Twitter
 
 Load the plugin with `load twitter`.
+
+#### Configuration
 
 This plugin needs to be configured before usage. Don’t worry, it’s easy and
 you’ll have to do that only once.  First, make sure you have a Twitter account
@@ -112,14 +125,18 @@ account, fill the required fields, and submit the form. Then, go to the
 to the “Details” tab, and click on “Create my access token” at the bottom.
 All you have to do now is to copy the tokens in your bot config:
 
-    set plugins.twitter.name                = your_bot_account_name
-    set plugins.twitter.consumer_key        = your_consumer_key
-    set plugins.twitter.consumer_secret     = your_consumer_secret
-    set plugins.twitter.access_token        = your_access_token
-    set plugins.twitter.access_token_secret = your_access_token_secret
+	set plugins.twitter.name                = your_bot_account_name
+	set plugins.twitter.consumer_key        = your_consumer_key
+	set plugins.twitter.consumer_secret     = your_consumer_secret
+	set plugins.twitter.access_token        = your_access_token
+	set plugins.twitter.access_token_secret = your_access_token_secret
 
 [twitter-sign-up]: https://twitter.com/signup
 [twitter-app]: https://dev.twitter.com/apps/new
+
+All the tweets from users you follow will be notified in all irc channels by default. to disable the output in a specific channel:
+
+	set channels.mychan.plugins.twitter.echo = 0
 
 #### Commands
 
@@ -129,6 +146,7 @@ All you have to do now is to copy the tokens in your bot config:
   filter.
 - `following [regex]`: list the accounts your bot is following, optionally
   filtered by a regex.
+
 
 ### URL
 
@@ -140,7 +158,18 @@ mention and now. It also tweets each URL on its Twitter account if
 `plugins.url.tweet_url` is set (default), and can optionally download and store
 images in a local directory. You can post an old link without being warned by
 using `#oldlink` in your message. You can also avoid the automatic tweet by using
-`notweet`.
+`#notweet`.
+
+#### Configuration
+
+	#to disable user url check in a specific chan:
+	set channels.mychan.plugins.url.test_url = 0
+	#to disable url publication on twitter in a specific chan:
+	set channels.mychan.plugins.url.tweet_url = 0
+	#if an url is an image, it can be stored with the option:
+	set channels.rtgi.plugins.url.store_image = /var/wwww/botaniko/images/
+	set channels.rtgi.plugins.url.chmod = 0666
+
 
 ### Wikipedia
 
@@ -149,25 +178,60 @@ used to search for any subject on Wikipedia:
 
     wikipedia something
 
-To change the default language, use the variable `plugins.wikipedia.loc`.
+#### Configuration
 
-### Linkmag
+	#change the default language
+	set plugins.wikipedia.loc = en
 
-Load the plugin with `load linkmag`.
 
 ### Meme
 
-Load the plugin with `load meme`.
+Load the plugin with `load meme`. This plugin allows you to make an image with a top and/or a bottom text.
+
+#### Configuration
+
+	#setup the path to the font to use
+	set plugins.meme.font = /usr/share/fonts/TTF/DroidSans-Bold.ttf
+	#setup where computed images are stored
+	set plugins.meme.savedir = /var/www/meme/
+	#setup rights for computed images
+	set plugins.meme.chmod = 0666
+	#setup the "root" urls of computed images
+	set plugins.meme.geturl = http://mydomain.com/meme/
+	#setup default size
+	set plugins.meme.size = medium
+	#setup this if meme url must be twitted
+	set plugins.meme.tweet = 1
+
+#### Commands
+
+- `meme img=url text1[|text2] [size=small|medium|large|huge] [fontsize=size1[|size2]]`: generate a meme and return its url
+
 
 ### Moc
 
 Load the plugin with `load moc`.
 
+
 ### RSS
 
-Load the plugin with `load rss`.
+Load the plugin with `load rss`. It allows you to subscribe your bot to rss feeds. News are notified in all irc channels by default.
 
-### Writing a plugin
+#### Configuration
+
+	#disable rss notification in a specific channel
+	set channels.mychan.plugins.rss.echo = 0
+
+#### Commands
+
+- `rss add myfeed http://myfeed.com/url [user=name password=pwd]`: subscribe to a rss feed
+- `rss rm myfeed`: unsubscribe
+- `rss list`: list all rss feeds
+- `rss read myfeed [count=5]`: read a rss feed
+
+
+
+## Writing a plugin
 
 you can easily setup a default configuration, hook events,
 add commands, and delay/repeat code.
