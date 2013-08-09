@@ -1,0 +1,5 @@
+language: perl
+perl:
+  - "5.10"
+notifications:
+  email: false
