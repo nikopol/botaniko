@@ -210,20 +210,31 @@ available event are (with given parameters):
 - `NICKCHANGE $old, $new`
 - `TWEET      $msg, $user`
 
+example:
 	use botaniko::hook;
 	use botaniko::irc;
-	hook MSG=>sub{
+	hook MSG => sub{
 		my($msg,$user,$from,$chan) = @_;
 		send_channel $chan => "$user: are you sure?";
 	};
 
 to add a command:
 
+	package botaniko::plugin::calc;
 	use botaniko::command;
-	command time=>{
-		help => 'display time',
-		root => 0,
-		bin  => sub{ [ scalar localtime ] }
+	command calc => {
+		help => 'evaluate a formula', #help for this command
+		root => 0,                    #admin only ?
+		bin  => sub{
+			my $formula = join(' ',@_);
+			$formula =~ s/[^\d\.\+\-\/\*\(\)]//g;
+			my $e = eval { $formula };
+			#you have to return an arrayref of strings
+			#to send to the channel
+			defined $e 
+				? [ "result: $e" ]
+				: [ pickone("unable to compute your stuff","check your syntax","what?!" ];
+		}
 	};
 
 to async code:
@@ -231,9 +242,12 @@ to async code:
 	use botaniko 'async';
 	use botaniko::irc;
 	async(
-		id       => 'helloworld',
-		cb       => sub{ send_channel all=>'hello world!' },
-		delay    => 20,
-		interval => undef
+		id       => 'helloworld',  #timer id
+		cb       => sub{
+			send_channel all=>"it's ".(scalar localtime)." !";
+		},
+		delay    => 0,      #delay in second before starting
+		interval => 3600,   #repeat interval in seconds,
+		                    #set to undef to run one time only
 	);
 
