@@ -3,5 +3,7 @@ perl:
   - "5.10"
 before_install:
   - sudo apt-get install libgd-gd2-perl libxpm-dev
+install:
+  - cpanm -v --installdeps --notest .
 notifications:
   email: false
