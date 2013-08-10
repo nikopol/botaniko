@@ -2,6 +2,6 @@ language: perl
 perl:
   - "5.10"
 before_install:
-  - sudo apt-get install libgd-gd2-perl
+  - sudo apt-get install libgd-gd2-perl libxpm-dev
 notifications:
   email: false
