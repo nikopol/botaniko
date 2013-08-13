@@ -275,6 +275,7 @@ available event are (with given parameters):
 - `TWEET      $msg, $user`
 
 example:
+
 	use botaniko::hook;
 	use botaniko::irc;
 	hook MSG => sub{
