@@ -1,4 +1,4 @@
-use Test::More tests => 10;
+use Test::More tests => 11;
 use YAML qw(LoadFile DumpFile);
 use File::Temp qw(tempfile);
 
@@ -20,10 +20,8 @@ ok(loadcfg(config=>$cfgfile), "config file loading");
 
 # cfg
 is_deeply(cfg(), $initcfg);
-
 is(cfg($shortkey => $cfgvar), $cfgvar, 'short key');
 is(LoadFile($cfgfile)->{$shortkey}, $cfgvar);
-
 is(cfg($longkey => $cfgvar), $cfgvar, 'long key');
 
 # chancfg
@@ -38,3 +36,5 @@ is(cfg($shortkey), $cfgvar);
 cfg_default('some' => 'thing');
 is(cfg('some'), 'thing');
 
+# flatcfg
+is_deeply(flatcfg({foo=>{bar=>42}}, '', {}), { 'foo.bar' => 42 });
