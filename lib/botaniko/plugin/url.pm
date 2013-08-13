@@ -7,6 +7,7 @@ use HTML::Entities;
 use Image::Info qw(image_info dim);
 use POSIX 'strftime';
 use DateTime::Format::Strptime;
+use Digest::SHA1 qw(sha1_hex);
 
 use botaniko::config;
 use botaniko::logger;
@@ -40,6 +41,7 @@ sub process_url {
 	my $title = '';
 	my $type  = '';
 	my $err   = '';
+	my $sha   = '';
 	my $tagol = $text =~ /\#oldlink/i;
 	$url = $r->request->uri->canonical->as_string if $r && $r->request;
 	if( $r->is_success ) {
@@ -55,8 +57,11 @@ sub process_url {
 			$title =~ s/^\s+|\s+$//g;
 			trace DEBUG=>($title?'title found '.$title:'title not found');
 		} elsif( $type =~ /image/i ) {
-			my $inf = image_info( \$r->decoded_content() );
+			my $raw = $r->decoded_content;
+			my $inf = image_info( \$raw );
 			if( $inf ) {
+				$sha = sha1_hex $raw;
+				trace DEBUG=>'image fingerprint '.$sha;
 				my( $width, $height ) = dim( $inf );
 				$title = "Image $width x $height";
 				$title .= ' : '.$inf->{Comment} if $inf->{Comment};
@@ -84,7 +89,7 @@ sub process_url {
                              : $url =~ /\.gif$/i || $type =~ /gif/i ? '.gif'
                              : '.jpg';
 						if( open( FH, '>', $fn ) ) {
-							print FH $r->decoded_content();
+							print FH $raw;
 							close FH;
 							chmod $perm => $fn;
 							trace DEBUG=>"image stored in $fn";
@@ -100,7 +105,11 @@ sub process_url {
 		trace WARN=>$err;
 	}
 	my $s = dbsearchterm $DBTYPE,'url',$url;
-	my $nbhit = $s && $s->{hits}->{total} ? 0+$s->{hits}->{total} : 0;
+	my $nbhit = $s && $s->{hits}{total} ? 0+$s->{hits}{total} : 0;
+	if( !$nbhit && $sha ) {
+		$s = dbsearchterm $DBTYPE,'sha',$sha;
+		$nbhit = $s && $s->{hits}{total} ? 0+$s->{hits}{total} : 0;
+	}
 	if( $nbhit && chancfg($chan,'plugins.url.test_url') && ($chan ne 'twitter' || chancfg($chan,'plugins.url.test_tweet')) ) {
 		unless( $tagol ) {
 			my $e = $parsedt->parse_datetime($s->{hits}->{hits}->[0]->{_source}->{date})->epoch;
@@ -131,6 +140,7 @@ sub process_url {
 			text => $text,
 			title=> $title,
 			meta => $url,
+			sha  => $sha,
 		} };
 		if( $chan ne 'twitter' && chancfg($chan,'plugins.url.tweet_url') && $text !~ /notweet/i ) {
 			$text =~ s/^[^\s\:]+\:\s+//;

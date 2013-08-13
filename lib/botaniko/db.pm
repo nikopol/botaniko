@@ -32,6 +32,7 @@ sub dbinit {
 			title   => { type=>'string' },
 			chan    => { type=>'string', index=>'not_analyzed' },
 			from    => { type=>'string', index=>'not_analyzed' },
+			sha     => { type=>'string', index=>'not_analyzed' },
 		} },
 		tweet => { properties => {
 			date    => { type=>'date', format=>'yyyy-MM-dd HH:mm:ss' },
@@ -39,6 +40,7 @@ sub dbinit {
 			text    => { type=>'string' },
 			meta    => { type=>'string' },
 			created => { type=>'string', index=>'not_analyzed' },
+			sha     => { type=>'string', index=>'not_analyzed' },
 		} },
 	};
 
@@ -74,19 +76,19 @@ sub dbinit {
 		);
 	} elsif( $reidx ) {
 		for( keys %$MAPPINGS ) {
-			trace DEBUG=>'updating $_ mapping';
+			trace DEBUG=>"updating $_ mapping";
 			$es->put_mapping(
 				index    => IDXNAME,
 				type     => $_,
 				mapping  => { $_ => $MAPPINGS->{$_} }
 			);
 		}
-		trace DEBUG=>'reindexing';
-		my $scroll = $es->scrolled_search(
-			search_type => 'scan',
-			scroll      => '5m'
-		);
-		$es->reindex(source=>$scroll);
+		#trace DEBUG=>'reindexing';
+		# my $scroll = $es->scrolled_search(
+		# 	search_type => 'scan',
+		# 	scroll      => '5m'
+		# );
+		# $es->reindex(source=>$scroll);
 	} elsif( $optim ) {
 		trace DEBUG=>'optimizing index';
 		$es->optimize_index(
