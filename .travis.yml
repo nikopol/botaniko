@@ -1,0 +1,9 @@
+language: perl
+perl:
+  - "5.10"
+before_install:
+  - sudo apt-get install libgd2-xpm-dev build-essential
+install:
+  - cpanm -v --installdeps --notest .
+notifications:
+  email: false
