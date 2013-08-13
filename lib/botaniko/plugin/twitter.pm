@@ -23,7 +23,10 @@ cfg_default 'plugins.twitter' => {
 	access_token        => 'your_access_token',
 	access_token_secret => 'your_access_token_secret',
 	interval            => 120,
-	lastid              => 0,
+	timeline            => 1,
+	timeline_lastid     => 0,
+	mentions            => 1,
+	mentions_lastid     => 0,
 };
 
 chancfg_default 'plugins.twitter' => {
@@ -38,42 +41,64 @@ my $twitter = Net::Twitter->new(
 );
 $twitter->access_token(cfg 'plugins.twitter.access_token');
 $twitter->access_token_secret(cfg 'plugins.twitter.access_token_secret');
-unless( cfg 'plugins.twitter.lastid' ) {
+unless( cfg 'plugins.twitter.timeline_lastid' ) {
 	my $timeline = eval { $twitter->friends_timeline({ count=>1 }) };
 	if( my $err = $@ ) {
 		trace ERROR=>'twitter '.$err->error;
 		$twitter = undef;
 	}
-	cfg 'plugins.twitter.lastid' => $$timeline[0] ? $$timeline[0]->{id} : 1;
+	cfg 'plugins.twitter.timeline_lastid' => $$timeline[0] ? $$timeline[0]->{id} : 1;
 }
-trace DEBUG=>"last tweet id set to ".cfg 'plugins.twitter.lastid';
+trace DEBUG=>"last tweet id set to ".cfg 'plugins.twitter.timeline_lastid';
 
-sub get_twitter_timeline {
+sub process_tweet {
+	my $timeline = shift;
+	my $me = cfg 'plugins.twitter.name';
+	while( my $tweet = pop @$timeline ) {
+		my $name = $tweet->{user}{screen_name};
+		if( $name ne $me ) {
+			my $text = $tweet->{text};
+			dbindex $DBTYPE=>{
+				name    => $name,
+				text    => $text,
+				created => $tweet->{created_at}
+			};
+			trace TWEET=>"$name: $text";
+			for my $chan ( channels() ) {
+				notify( $chan=>'@'.$name.': '.$text )
+					if chancfg($chan,'plugins.twitter.echo');
+			}
+			fire TWEET=>$text,$name;
+		}
+	}
+}
+
+sub fetch_twitter_timeline {
 	return unless $twitter;
-	trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.lastid');
-	my $timeline = eval { $twitter->home_timeline({ count=>10, since_id=>cfg('plugins.twitter.lastid') }) };
+	trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.timeline_lastid');
+	my %opt = ( count=>10 );
+	$opt{since_id} = cfg('plugins.twitter.timeline_lastid') if cfg('plugins.twitter.timeline_lastid');
+	my $timeline = eval { $twitter->home_timeline(\%opt) };
 	if( my $err = $@ ) {
 		trace ERROR=>'twitter '.$err->error;
 	} elsif( $$timeline[0] ) {
-		cfg 'plugins.twitter.lastid'=>$$timeline[0]->{id};
-		my $me = cfg 'plugins.twitter.name';
-		while( my $tweet = pop @$timeline ) {
-			my $name = $tweet->{user}->{screen_name};
-			if( $name ne $me ) {
-				my $text = $tweet->{text};
-				dbindex $DBTYPE=>{
-					name    => $name,
-					text    => $text,
-					created => $tweet->{created_at}
-				};
-				trace TWEET=>"$name: $text";
-				for my $chan ( channels() ) {
-					notify( $chan=>'@'.$name.': '.$text )
-						if chancfg($chan,'plugins.twitter.echo');
-				}
-				fire TWEET=>$text,$name;
-			}
-		}
+		cfg 'plugins.twitter.timeline_lastid'=>$$timeline[0]->{id};
+		process_tweet $timeline;
+	}
+}
+
+sub fetch_twitter_mentions {
+	return unless $twitter;
+	return unless cfg('plugins.twitter.mentions');
+	trace DEBUG=>'get twitter mentions from '.cfg('plugins.twitter.mentions_lastid');
+	my %opt = ( count=>10 );
+	$opt{since_id} = cfg('plugins.twitter.mentions_lastid') if cfg('plugins.twitter.mentions_lastid');
+	my $timeline = eval { $twitter->mentions_timeline(\%opt) };
+	if( my $err = $@ ) {
+		trace ERROR=>'twitter '.$err->error;
+	} elsif( $$timeline[0] ) {
+		cfg 'plugins.twitter.mentions_lastid'=>$$timeline[0]->{id};
+		process_tweet $timeline;
 	}
 }
 
@@ -90,8 +115,15 @@ hook TOTWEET=>sub {
 
 async(
 	id       => 'timeline',
-	cb       => sub{ get_twitter_timeline },
+	cb       => sub{ fetch_twitter_timeline },
 	after    => 20,
+	interval => cfg('plugins.twitter.interval') || 120,
+);
+
+async(
+	id       => 'mentions',
+	cb       => sub{ fetch_twitter_mentions },
+	after    => 30,
 	interval => cfg('plugins.twitter.interval') || 120,
 );
 
