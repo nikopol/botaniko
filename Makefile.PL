@@ -22,12 +22,14 @@ requires( 'JSON::XS' );
 requires( 'DateTime::Format::Strptime' );
 requires( 'GD' );
 
-#tests 't/*.t';
+tests 't/*.t';
 #author_tests 'xt';
 
 install_script 'bin/botaniko';
 
-#build_requires 'Test::More';
+build_requires 'Test::More';
+build_requires 'File::Temp';
+build_requires 'YAML';
 build_requires 'Module::Install';
 
 #use_test_base;
