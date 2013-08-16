@@ -31,7 +31,9 @@ my %chandft;
 
 sub cfg {
 	return $cfg unless @_;
-	my @tree = split /\./, $_[0];
+	my $set = @_ > 1;
+	my( $path, $val, $nosave ) = @_;
+	my @tree = split /\./, $path;
 	my $key = pop @tree;
 	my $b = $cfg;
 	for( @tree ) {
@@ -41,9 +43,9 @@ sub cfg {
 		}
 		$b = $b->{$_};
 	}
-	if( @_ > 1 ) {
-		$b->{$key} = $_[1];
-		file($cfgfile => $cfg) unless $_[2];
+	if( $set ) {
+		defined $val ? $b->{$key} = $val : delete $b->{$key};
+		file($cfgfile => $cfg) unless $nosave;
 	}
 	$b->{$key}
 }
