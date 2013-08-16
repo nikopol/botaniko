@@ -48,7 +48,7 @@ sub process_url {
 		trace DEBUG=>'resolved as '.$url.' ('.$r->headers->content_type.')';
 		$type = $r->headers->content_type;
 		if( $type =~ /html/i ) {
-			$html = $r->decoded_content;
+			$html = $r->decoded_content() || '';
 			$html =~ s/[\r\n]//g;
 			$html =~ s/<!--.+?-->//g;
 			$title = ( $html =~ /<title>([^<]+)/i || $html =~ /<h1>([^<]+)/i ) 
