@@ -146,7 +146,7 @@ All the tweets from users you follow will be notified in all irc channels by def
   filter.
 - `following [regex]`: list the accounts your bot is following, optionally
   filtered by a regex.
-
+- `dm user message`: send a direct message.
 
 ### URL
 
