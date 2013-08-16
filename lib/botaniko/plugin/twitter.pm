@@ -27,6 +27,8 @@ cfg_default 'plugins.twitter' => {
 	timeline_lastid     => 0,
 	mentions            => 1,
 	mentions_lastid     => 0,
+	dm                  => 1,
+	dm_lastid           => 0,
 };
 
 chancfg_default 'plugins.twitter' => {
@@ -51,54 +53,36 @@ unless( cfg 'plugins.twitter.timeline_lastid' ) {
 }
 trace DEBUG=>"last tweet id set to ".cfg 'plugins.twitter.timeline_lastid';
 
-sub process_tweet {
-	my $timeline = shift;
-	my $me = cfg 'plugins.twitter.name';
-	while( my $tweet = pop @$timeline ) {
-		my $name = $tweet->{user}{screen_name};
-		if( $name ne $me ) {
-			my $text = $tweet->{text};
-			dbindex $DBTYPE=>{
-				name    => $name,
-				text    => $text,
-				created => $tweet->{created_at}
-			};
-			trace TWEET=>"$name: $text";
-			for my $chan ( channels() ) {
-				notify( $chan=>'@'.$name.': '.$text )
-					if chancfg($chan,'plugins.twitter.echo');
+sub twitter_fetch {
+	return unless $twitter;
+	my( $what, $fetch ) = @_;
+	my $lastidkey = 'plugins.twitter.'.$what.'_lastid';
+	trace DEBUG=>'get twitter '.$what.' from '.cfg($lastidkey);
+	my %opt = ( count=>10 );
+	$opt{since_id} = cfg($lastidkey) if cfg($lastidkey);
+	my $timeline = eval { &$fetch(\%opt) };
+	if( my $err = $@ ) {
+		trace ERROR=>'twitter '.$err->error;
+	} elsif( $$timeline[0] ) {
+		cfg $lastidkey => $$timeline[0]->{id};
+		my $me = cfg 'plugins.twitter.name';
+		while( my $tweet = pop @$timeline ) {
+			my $name = $tweet->{user}{screen_name} || $tweet->{sender}{screen_name} || '?';
+			if( $name ne $me ) {
+				my $text = $tweet->{text};
+				dbindex $DBTYPE=>{
+					name    => $name,
+					text    => $text,
+					created => $tweet->{created_at}
+				};
+				trace TWEET=>"$name: $text";
+				for my $chan ( channels ) {
+					notify( $chan=>'@'.$name.': '.$text )
+						if chancfg($chan,'plugins.twitter.echo');
+				}
+				fire TWEET=>$text,$name;
 			}
-			fire TWEET=>$text,$name;
 		}
-	}
-}
-
-sub fetch_twitter_timeline {
-	return unless $twitter;
-	trace DEBUG=>'get twitter timeline from '.cfg('plugins.twitter.timeline_lastid');
-	my %opt = ( count=>10 );
-	$opt{since_id} = cfg('plugins.twitter.timeline_lastid') if cfg('plugins.twitter.timeline_lastid');
-	my $timeline = eval { $twitter->home_timeline(\%opt) };
-	if( my $err = $@ ) {
-		trace ERROR=>'twitter '.$err->error;
-	} elsif( $$timeline[0] ) {
-		cfg 'plugins.twitter.timeline_lastid'=>$$timeline[0]->{id};
-		process_tweet $timeline;
-	}
-}
-
-sub fetch_twitter_mentions {
-	return unless $twitter;
-	return unless cfg('plugins.twitter.mentions');
-	trace DEBUG=>'get twitter mentions from '.cfg('plugins.twitter.mentions_lastid');
-	my %opt = ( count=>10 );
-	$opt{since_id} = cfg('plugins.twitter.mentions_lastid') if cfg('plugins.twitter.mentions_lastid');
-	my $timeline = eval { $twitter->mentions_timeline(\%opt) };
-	if( my $err = $@ ) {
-		trace ERROR=>'twitter '.$err->error;
-	} elsif( $$timeline[0] ) {
-		cfg 'plugins.twitter.mentions_lastid'=>$$timeline[0]->{id};
-		process_tweet $timeline;
 	}
 }
 
@@ -115,15 +99,22 @@ hook TOTWEET=>sub {
 
 async(
 	id       => 'timeline',
-	cb       => sub{ fetch_twitter_timeline },
+	cb       => sub{ twitter_fetch( timeline => sub { $twitter->home_timeline(@_) } ) },
 	after    => 20,
 	interval => cfg('plugins.twitter.interval') || 120,
 );
 
 async(
 	id       => 'mentions',
-	cb       => sub{ fetch_twitter_mentions },
+	cb       => sub{ twitter_fetch( mentions => sub { $twitter->mentions_timeline(@_) } ) },
 	after    => 30,
+	interval => cfg('plugins.twitter.interval') || 120,
+);
+
+async(
+	id       => 'dm',
+	cb       => sub{ twitter_fetch( dm => sub { $twitter->direct_messages(@_) } ) },
+	after    => 40,
 	interval => cfg('plugins.twitter.interval') || 120,
 );
 
@@ -196,6 +187,22 @@ command
 				return ['twitter '.$err->error];
 			}
 			[ $r->{screen_name}.' ('.($r->{name}?$r->{name}:'no name').') unfollowed' ];
+		}
+	},
+	dm => {
+		help => 'dm tweetos msg',
+		root => 1,
+		bin  => sub {
+			return unless @_;
+			my $who = shift() || return ['to who ?'];
+			my $msg = join(' ',@_) || return ['message ?'];;
+			my $r = eval { $twitter->new_direct_message( {screen_name=>$who,text=>$msg} ) };
+			if( my $err = $@ ) {
+
+				return ['twitter '.$err->error];
+			}
+			use YAML::XS;warn Dump $r;
+			[ 'dm sent to @'.$r->{recipient}{screen_name} ];
 		}
 	};
 
