@@ -33,26 +33,40 @@ sub scrap {
 
 command
 	scrap => {
-		help => 'scrap name [url rule]',
+		help => 'scrap [[-]name [url rule]]',
 		root => 0,
 		bin  => sub {
-			return ['?'] unless @_;
-			my $scrap = shift @_;
-			if( @_ > 1 ) {
-				my $url  = shift @_;
-				my $rule = join(' ',@_);
-				my $key  = 'plugins.scraper.scraps.'.$scrap;
-				my $upd  = cfg $key;
-				cfg $key => {
-					url  => $url,
-					rule => $rule,
-				};
-				return [ $upd
-					? 'scrap '.$scrap.' updated'
-					: 'scrap '.$scrap.' added'
-				]
+			if( @_ == 0 ) {
+				my @scraps = keys %{cfg('plugins.scraper.scraps')||{}};
+				my @out;
+				push( @out, join(',', splice(@scraps,0,4>@scraps?scalar @scraps:4)) ) while @scraps;
+				return @out ? trunc( \@out ) : ['no scraps available'];
 			} else {
-				return scrap( $scrap )
+				my $what = shift;
+				my( $rm, $scrap ) = $what=~/^(-?)(.+)$/;
+				my $key  = 'plugins.scraper.scraps.'.$scrap;
+				if( @_ > 1 ) {
+					my $url  = shift @_;
+					my $rule = join(' ',@_);
+					my $upd  = cfg $key;
+					cfg $key => {
+						url  => $url,
+						rule => $rule,
+					};
+					return [ $upd
+						? 'scrap '.$scrap.' updated'
+						: 'scrap '.$scrap.' added'
+					]
+				} elsif( $rm ) {
+					if( cfg $key ) {
+						cfg $key => undef;
+						return [ 'scrap '.$scrap.' deleted' ];
+					} else {
+						return [ 'scrap '.$scrap.' not found' ];
+					}
+				} else {
+					return scrap( $scrap )
+				}
 			}
 		}
 	};
