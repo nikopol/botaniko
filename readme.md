@@ -108,7 +108,8 @@ By default, the bot will prefix all matches with `=> `. You can change this with
   This register the scrap as `wk`.
 - `scrap name`. Execute a scrap (e.g. `scrap wk`).  The bot will
   print all matches (there’s only one in the example above).
-
+- `scrap -name`. Delete the scrap known as `name`.
+- `scrap`. List all recorded scraps.
 
 ### Twitter
 
