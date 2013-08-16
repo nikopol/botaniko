@@ -3,6 +3,9 @@ package botaniko::plugin::twitter;
 use strict;
 use warnings;
 use 5.010;
+
+no if $] >= 5.018, 'warnings', "experimental::smartmatch";
+
 use Net::Twitter;
 
 use botaniko 'async';
@@ -15,6 +18,8 @@ use botaniko::irc;
 use botaniko::tools;
 
 my $DBTYPE = 'tweet';
+my $MAXTWEETIDS = 100;
+my @tweetids;
 
 cfg_default 'plugins.twitter' => {
 	name                => 'your_bot_twitter_account_name',
@@ -67,6 +72,7 @@ sub twitter_fetch {
 		cfg $lastidkey => $$timeline[0]->{id};
 		my $me = cfg 'plugins.twitter.name';
 		while( my $tweet = pop @$timeline ) {
+			next if $tweet->{id} ~~ @tweetids;
 			my $name = $tweet->{user}{screen_name} || $tweet->{sender}{screen_name} || '?';
 			if( $name ne $me ) {
 				my $text = $tweet->{text};
@@ -82,6 +88,8 @@ sub twitter_fetch {
 				}
 				fire TWEET=>$text,$name;
 			}
+			push @tweetids, $tweet->{id};
+			shift @tweetids while scalar @tweetids > $MAXTWEETIDS;
 		}
 	}
 }
@@ -201,7 +209,6 @@ command
 
 				return ['twitter '.$err->error];
 			}
-			use YAML::XS;warn Dump $r;
 			[ 'dm sent to @'.$r->{recipient}{screen_name} ];
 		}
 	};
