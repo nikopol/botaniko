@@ -12,8 +12,6 @@ use 5.010;
 use Encode;
 use AnyEvent;
 use Digest::SHA1 'sha1_hex';
-use utf8;
-no utf8;
 
 use botaniko::config;
 use botaniko::logger;
