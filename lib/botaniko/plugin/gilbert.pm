@@ -13,7 +13,7 @@ use botaniko::command;
 use botaniko::tools;
 
 #global config
-cfg_default 'plugins.bab' => {
+cfg_default 'plugins.gilbert' => {
     version => 1,
     host => 'http://your-host.com:your-port',
     api => {
@@ -86,7 +86,7 @@ my $formats = {
 };
 
 sub get_players {
-	my $cfg = cfg 'plugins.bab';
+	my $cfg = cfg 'plugins.gilbert';
     my $url = "$cfg->{host}$cfg->{api}{users}";
 	my $json = useragent->get( $url );
 	unless( $json->is_success ) {
@@ -97,7 +97,7 @@ sub get_players {
     for (@$r) {
         $players->{$_->{id}} = $_->{username};
     }
-    cfg 'plugins.bab.players', $players;
+    cfg 'plugins.gilbert.players', $players;
 }
 
 sub mk_filter {
@@ -141,7 +141,7 @@ sub get_games {
     my $limit = shift() || 5;
     my $filter = shift() || '.*&.*/.*&.*';
     my $format = shift() || 'classic';
-    my $cfg = cfg 'plugins.bab';
+    my $cfg = cfg 'plugins.gilbert';
     $filter = mk_filter($filter);
     trace(DEBUG=>"limit:".$limit);
     my $url = "$cfg->{host}$cfg->{api}{games}";
@@ -151,7 +151,7 @@ sub get_games {
 		return ['error loading games list : '.$json->status_line];
 	}
     my $r = decode_json( $json->decoded_content );
-    my $players = cfg('plugins.bab.users') || get_players;
+    my $players = cfg('plugins.gilbert.users') || get_players;
     my $games = [];
 
     for (@$r) {
@@ -185,7 +185,7 @@ command
 		root => 0,
 		bin  => sub {
 			my( $qry, $limit, $format ) = getoptions( \@_,
-				limit  => cfg('plugins.bab.limit'),
+				limit  => cfg('plugins.gilbert.limit'),
                 format => 'classic',
 			);
 
