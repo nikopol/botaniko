@@ -83,7 +83,17 @@ By default, the plugin will use the latitude and longitude of Paris, France. You
 
 #### Commands
 
-	`ephemeride [yyy-mm-dd]`
+	ephemeride [yyy-mm-dd]
+
+
+### Say
+
+Load the plugin with `load say`. It let you make your bot say something on any
+channel (you need to be admin).
+
+#### Commands
+
+    say <channel> <the message>
 
 
 ### Scraper
