@@ -273,7 +273,7 @@ sub run {
 	$what =~ s/^\s+|\s+$//g;
 	my @out;
 	if( $what ) {
-		trace INFO=>"$cmdnick want $what";
+		trace INFO=>"$cmdnick wants $what";
 		my @args = split /\s/,$what;
 		my $c = shift @args;
 		if( $c && exists $commands->{$c} ) {
