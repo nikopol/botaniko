@@ -83,8 +83,13 @@ sub twitter_fetch {
 				};
 				trace TWEET=>"$name: $text";
 				for my $chan ( channels ) {
-					notify( $chan=>'@'.$name.': '.$text )
-						if chancfg($chan,'plugins.twitter.echo');
+					next unless chancfg($chan,'plugins.twitter.echo');
+					my @lines = split /\s*[\r\n]+\s*/, $text;
+					my $max = 5;
+					while( scalar @lines && $max ) {
+						notify( $chan => ($max == 5 ? ' ' x (1+length($name)) : '@'.$name).': '.(shift @lines) );
+						$max--;
+					}
 				}
 				fire TWEET=>$text,$name;
 			}
