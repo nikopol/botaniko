@@ -137,7 +137,9 @@ sub plant {
 		},
 		privatemsg => sub {
 			my( $cnx, $nick, $msg ) = @_;
-			my $what = decode_utf8 $msg->{params}->[1];
+			my $what = $msg->{params}->[1];
+			utf8::upgrade($what);
+			$what = decode_utf8 $what;
 			if( $msg->{command} eq 'PRIVMSG' ) {
 				my( $who, $from ) = $msg->{prefix} =~ m{^([^\!]*)\!(.*)$};
 				my $ans;
