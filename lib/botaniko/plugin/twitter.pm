@@ -87,7 +87,7 @@ sub twitter_fetch {
 					my @lines = split /\s*[\r\n]+\s*/, $text;
 					my $max = 5;
 					while( scalar @lines && $max ) {
-						notify( $chan => ($max == 5 ? ' ' x (1+length($name)) : '@'.$name).': '.(shift @lines) );
+						notify( $chan => ($max == 5 ? '@'.$name : ' ' x (1+length($name))).': '.(shift @lines) );
 						$max--;
 					}
 				}
