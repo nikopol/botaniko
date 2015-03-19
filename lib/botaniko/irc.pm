@@ -12,6 +12,12 @@ use botaniko::config;
 use base 'Exporter';
 our @EXPORT = qw(irc channels send_channel send_user notify join_channel leave_channel channel_list);
 
+sub tempo {
+	state $last;
+	sleep 1 if $last && $last == time;
+	$last = time;
+}
+
 sub irc {
 	state $irc;
 	$irc = new AnyEvent::IRC::Client() unless $irc;
@@ -30,10 +36,9 @@ sub channels {
 sub send_channel {
 	return if cfg 'mute';
 	for my $chan ( channels shift ) {
-		my $count = @_;
 		for my $msg ( @_ ) {
+			tempo;
 			irc->send_chan($chan, PRIVMSG=>($chan, encode_utf8 $msg));
-			sleep 1 if --$count;
 		}
 	}
 }
@@ -41,18 +46,17 @@ sub send_channel {
 sub send_user {
 	my $user = shift;
 	while( my $msg = shift @_ ) {
+		tempo;
 		irc->send_srv(PRIVMSG=>$user, encode_utf8 $msg);
-		sleep 1 if @_;
 	}
 }
 
 sub notify {
 	return if cfg 'mute';
 	for my $chan ( channels shift ) {
-		my $count = @_;
 		for my $msg ( @_ ) {
 			irc->send_chan($chan, NOTICE=>($chan, encode_utf8 $msg));
-			sleep 1 if --$count;
+			tempo;
 		}
 	}
 }
