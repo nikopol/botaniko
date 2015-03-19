@@ -25,7 +25,7 @@ use botaniko::tools;
 use base 'Exporter';
 our @EXPORT = qw(plant async unasync);
 
-our $VERSION = '0.9';
+our $VERSION = '1.0';
 
 our $w;
 my %watch;
@@ -117,6 +117,10 @@ sub plant {
 				trace INFO=>"$nick leaved (".($msg||'no msg').')';
 				fire USERPART=>$nick,$chan,$msg;
 			}
+		},
+		channel_remove => sub {
+			my( $cnx, $msg, $channel ) = @_;
+			trace NOTICE=>"channel $channel removed : $msg";
 		},
 		quit => sub {
 			my( $cnx, $nick, $msg ) = @_;

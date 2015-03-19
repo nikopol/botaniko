@@ -1,4 +1,4 @@
-# botaniko 0.9
+# botaniko 1.0
 
 is an IRC Bot "qui plante... ou pas"
 © niko - under the [artistic license](http://www.perlfoundation.org/artistic_license_1_0)
