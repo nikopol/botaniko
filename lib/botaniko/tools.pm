@@ -9,7 +9,7 @@ use botaniko::logger;
 use botaniko::config;
 
 use base 'Exporter';
-our @EXPORT = qw(admin error delay useragent record pickone trunc getoptions);
+our @EXPORT = qw(admin error delay useragent record pickone trunc getoptions trim);
 
 sub error {
 	$@ = shift;
@@ -94,6 +94,12 @@ sub getoptions {
 		}
 	}
 	( $prm, @opt )
+}
+
+sub trim {
+	my $txt = shift;
+	$txt =~ s/(^\s+|\s+$)//gm;
+	$txt
 }
 
 1
