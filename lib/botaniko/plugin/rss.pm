@@ -6,7 +6,8 @@ use 5.010;
 
 use POSIX 'strftime';
 use HTTP::Headers;
-use XML::FeedPP;
+use XML::RSS;
+use DateTime::Format::Mail;
 
 use botaniko 'async';
 use botaniko::config;
@@ -25,6 +26,8 @@ chancfg_default 'plugins.rss' => {
 	echo => 1,
 };
 
+my $dfm = DateTime::Format::Mail->new();
+ 
 sub read_feed {
 	my $f = shift;
 	trace DEBUG=>'read flux '.$f->{url};
@@ -36,7 +39,15 @@ sub read_feed {
 	my $r = useragent->request( $req );
 	return trace(ERROR=>'error loading '.$f->{url}.' : '.$r->status_line)
 		unless $r->is_success;
-	XML::FeedPP->new( $r->decoded_content );
+	my $rss = XML::RSS->new();
+	$rss->parse( $r->decoded_content );
+	for my $item ( @{$rss->{items}} ) {
+		for my $key ( keys %$item ) {
+			$item->{$key} = trim $item->{$key};
+		}
+		$item->{dateiso} = eval { $dfm->parse_datetime($item->{pubDate} )->datetime } || $item->{pubDate};
+	}
+	$rss;
 }
 
 sub check_rss {
@@ -46,20 +57,20 @@ sub check_rss {
 	for my $name ( keys %$flux ) {
 		if( my $feed = read_feed($flux->{$name}) ){
 			$nbflux++;
-			my $lastdate = $flux->{$name}->{lastdate} || '';
+			my $lastdate = $flux->{$name}{lastdate} || '';
 			my $maxdate;
-			for my $item ( $feed->get_item() ) {
-				if( !$lastdate || ($lastdate cmp $item->pubDate()) == -1 ) {
+			for my $item ( @{$feed->{items}} ) {
+				if( !$lastdate || ($lastdate cmp $item->{dateiso}) == -1 ) {
 					$nbread++;
-					my $who  = $item->author() || 'unknown';
-					my $what = $item->title() || 'no content';
+					my $who  = $item->{author} || 'unknown';
+					my $what = $item->{title} || 'no content';
 					trace NOTICE=>"$who: $what";
 					for my $chan ( channels() ) {
 						notify( $chan=>$name.' @'.$who.': '.$what )
 							if chancfg($chan,'plugins.rss.echo');
 					}
 					fire RSS => $what,$who;
-					$maxdate = $item->pubDate() if !$maxdate || ($maxdate cmp $item->pubDate()) == -1;
+					$maxdate = $item->{dateiso} if !$maxdate || ($maxdate cmp $item->{dateiso}) == -1;
 				}
 			}
 			$flux->{$name}{lastdate} = $maxdate if $maxdate;
@@ -93,7 +104,7 @@ command
 				$count = 10 if $count > 10;
 				$count = 5 if $count < 1;
 				trunc(
-					[ map { $_->pubDate().' @'.$_->author().' : '.$_->title() } $feed->get_item() ],
+					[ map { $_->{pubDate}.' @'.$_->{author}.' : '.$_->{title} } @{$feed->{items}} ],
 					$count
 				)
 			}elsif( $cmd =~ /li?st/i ){
